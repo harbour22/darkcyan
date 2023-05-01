@@ -1,7 +1,10 @@
 from blessed import Terminal
+from rich.progress import Progress
 
 from constants import DataType
 from constants import DataTag
+from constants import DEFAULT_DET_SRC_NAME
+from constants import DEFAULT_CLASSES_TXT
 from local_data_helpers import display_available_data
 from local_data_helpers import get_available_data_versions
 from local_data_helpers import prepare_working_directory
@@ -10,8 +13,17 @@ from local_data_helpers import create_main_from_scratch
 from local_data_helpers import get_local_zipfile_for_version
 from local_data_helpers import get_local_scratch_directory_for_version
 
+from config import Config
+
+from pathlib import Path
+import shutil
+import difflib
+
+
+
 command_options =  ['Display available data',
                     'Create local working copy of data',
+                    'Launch labelImg',
                     'Build master from local working copy',
                     'Remove local working copy of data',
                     'Prepare data for training']
@@ -45,6 +57,77 @@ def ask_for_data_version(datatype, tag):
         version = versions[int(term.inkey())-1]
         print(term.darkcyan(f'{version}'))
         return version
+
+def run_labelimg():
+
+    data_version = ask_for_data_version(DataType.det, DataTag.scratch)
+
+    data_directory = get_local_scratch_directory_for_version(data_version, DataType.det)
+
+    parent_directory = data_directory / DEFAULT_DET_SRC_NAME
+    
+    image_dirs = []
+    for file in Path(parent_directory).iterdir():
+        if file.is_dir():
+            image_dirs.append(file)
+
+    if(len(image_dirs) == 0):
+        print(term.red(f'No images found'))
+        return
+    
+    print(term.white(f'Choose the image directory: '))
+    for choice, image_dir in enumerate(image_dirs, start=1):
+        print(term.white(f'{choice}: {image_dir.name}'))
+    inp = ''
+    with term.cbreak():
+        inp = term.inkey()
+        print(term.darkcyan(f'{inp}'))
+
+    image_dir = image_dirs[int(inp)-1]
+    print(image_dir)
+
+    if not (image_dir / DEFAULT_CLASSES_TXT).exists():
+        print(term.red(f'No classes.txt found in {image_dir}, copying from {parent_directory}'))
+        shutil.copy(parent_directory / DEFAULT_CLASSES_TXT, 
+                    image_dir / DEFAULT_CLASSES_TXT)
+
+    import subprocess
+    import sys
+
+    labelImg_cmd = Config.get_value('labelImg_cmd')
+    labelImg_args = f'{image_dir.as_posix()} {(parent_directory / DEFAULT_CLASSES_TXT).as_posix()} {image_dir.as_posix()}'
+    with Progress(transient=True) as progress:
+        task1 = progress.add_task(f"[blue]Running imageLbl for version {data_version}", total=None)
+        
+        pipe = subprocess.Popen(f'{labelImg_cmd} {labelImg_args}', 
+                                shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) 
+        output = pipe.communicate()[0].decode('utf-8')
+        output_stderr = pipe.communicate()[1].decode('utf-8')
+        progress.update(task1, completed=1) 
+
+    print()
+    with open(parent_directory / DEFAULT_CLASSES_TXT, 'r') as parent_classes:
+        with open(image_dir / DEFAULT_CLASSES_TXT, 'r') as child_classes:
+            diff = difflib.unified_diff(
+                parent_classes.readlines(),
+                child_classes.readlines(),
+                fromfile='Parent Classes.txt',
+                tofile='Edited Classes.txt',
+            )
+            edits = False
+            for line in diff:
+                sys.stdout.write(line)
+                edits = True
+            if(edits):
+                print(term.red(f'Changes detected, do you want to copy to parent? (y/n)'))
+                with term.cbreak():
+                    key = term.inkey()
+                    print(term.darkcyan(f'{key}'))
+
+                    if(key == 'y'):
+                        shutil.copy(image_dir / DEFAULT_CLASSES_TXT, 
+                                    parent_directory / DEFAULT_CLASSES_TXT)
+                        print(term.white(f'Copied {image_dir / DEFAULT_CLASSES_TXT} to {parent_directory / DEFAULT_CLASSES_TXT}'))
 
 def author_new_dataset():
     
@@ -172,8 +255,11 @@ if(__name__== '__main__'):
                 author_new_dataset()
             case '3':
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                create_main_dataset_from_scratch()
+                run_labelimg()
             case '4':
+                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
+                create_main_dataset_from_scratch()
+            case '5':
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
                 remove_working_copy_of_data()
 

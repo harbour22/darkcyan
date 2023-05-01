@@ -8,3 +8,5 @@ DataType = Enum('DataType', ['det','cls'])
 DataTag = Enum('DataTag',['main', 'scratch'])
 
 DEFAULT_DATA_SUFFIX = 'limetree'
+DEFAULT_DET_SRC_NAME = 'images_det_src'
+DEFAULT_CLASSES_TXT = 'classes.txt'

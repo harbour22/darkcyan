@@ -10,6 +10,7 @@ from constants import DEFAULT_CONFIG_DIR
 DEFAULT_CONFIG = {'scratch_dir': (Path.home() / 'developer' / 'darkcyan_data' / 'scratch').as_posix(),
                   'local_data_repository': (Path.home() / 'developer' / 'darkcyan_data' / 'main').as_posix(),
                   'data_suffix': 'limetree',
+                  'labelImg_cmd': ['labelImg'],
                   }
 
 class Config:
