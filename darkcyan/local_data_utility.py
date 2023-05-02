@@ -18,6 +18,7 @@ term = Terminal()
 local_data_repository = Path(Config.get_value('local_data_repository'))
 scratch_dir = Path(Config.get_value('scratch_dir'))
 data_suffix = Config.get_value('data_suffix')
+temp_dir = Path(Config.get_value('temp_dir'))
                              
 def init_directories():
     if(not local_data_repository.exists()):
@@ -25,7 +26,11 @@ def init_directories():
         os.makedirs(local_data_repository)
     if(not scratch_dir.exists()):
         print(f"Local scratch repository {scratch_dir} doesn't exist, creating")
-        os.makedirs(scratch_dir)    
+        os.makedirs(scratch_dir)
+    if(not temp_dir.exists()):
+        print(f"Local temp directory {scratch_dir} doesn't exist, creating")
+        os.makedirs(temp_dir)        
+        
 
 def prepare_working_directory(base_version, new_version, type=DataType.det):
     """ Prepare the working directory for the given version """
@@ -42,8 +47,7 @@ def create_main_from_scratch(version, type=DataType.det):
     init_directories()
     working_dir = get_local_scratch_directory_for_version(version, type)
     data_filename = f'{data_suffix}_v{version}_{type.name}'
-    target_filename = get_local_zipfile_for_version(version, type, False)
-    manager = enlighten.get_manager()
+    target_filename = get_local_zipfile_for_version(version, type, False)    
 
     with Progress(transient=True) as progress:
         task1 = progress.add_task("[blue]Creating zipfile...", total=None)

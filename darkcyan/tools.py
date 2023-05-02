@@ -5,13 +5,13 @@ from constants import DataType
 from constants import DataTag
 from constants import DEFAULT_DET_SRC_NAME
 from constants import DEFAULT_CLASSES_TXT
-from local_data_helpers import display_available_data
-from local_data_helpers import get_available_data_versions
-from local_data_helpers import prepare_working_directory
-from local_data_helpers import remove_scratch_version
-from local_data_helpers import create_main_from_scratch
-from local_data_helpers import get_local_zipfile_for_version
-from local_data_helpers import get_local_scratch_directory_for_version
+from local_data_utility import display_available_data
+from local_data_utility import get_available_data_versions
+from local_data_utility import prepare_working_directory
+from local_data_utility import remove_scratch_version
+from local_data_utility import create_main_from_scratch
+from local_data_utility import get_local_zipfile_for_version
+from local_data_utility import get_local_scratch_directory_for_version
 
 from config import Config
 
