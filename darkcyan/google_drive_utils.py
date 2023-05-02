@@ -1,6 +1,6 @@
 from __future__ import print_function
 
-import os.path
+from rich.progress import Progress
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -84,24 +84,30 @@ def get_parent_directory_id(parent_directory_path):
 def upload_zip(upload_file_path, parent_id):
 
     creds = get_credentials()
+    with Progress(transient=True) as progress:
+        task1 = progress.add_task(f"[blue]Uploading {upload_file_path.name} to google drive", total=None)
 
-    try:
-        # create drive api client
-        service = build('drive', 'v3', credentials=creds)
+        try:
+            # create drive api client
+            service = build('drive', 'v3', credentials=creds)
 
-        file_metadata = {'name': upload_file_path.name, 'parents':[parent_id]}
-        media = MediaFileUpload(upload_file_path,
-                                mimetype='application/zip', resumable=True)
-        # pylint: disable=maybe-no-member
-        file = service.files().create(body=file_metadata, media_body=media,
-                                      fields='id').execute()
-        print(f'File ID: {file.get("id")}')
+            file_metadata = {'name': upload_file_path.name, 'parents':[parent_id]}
+            media = MediaFileUpload(upload_file_path,
+                                    mimetype='application/zip', resumable=True)
+            # pylint: disable=maybe-no-member
+            
+            file = service.files().create(body=file_metadata, media_body=media,
+                                    fields='id').execute()
+            progress.update(task1, completed=1)    
+            
+            print(f'File ID: {file.get("id")}')
 
-    except HttpError as error:
-        print(F'An error occurred: {error}')
-        file = None
+        except HttpError as error:
+            print(F'An error occurred: {error}')
+            file = None
+            raise error
 
-    return file.get('id')
+        return file.get('id')
 
 if __name__ == '__main__':
     parent_directory_id = get_parent_directory_id(f'{DEFAULT_GOOGLEDRIVE_YOLO_DIR}/cls')
