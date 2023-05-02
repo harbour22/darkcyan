@@ -67,6 +67,10 @@ def remove_scratch_version(scratch_version, type=DataType.det):
     else:
         print(f"Scratch version {working_dir} doesn't exist, skipping")
 
+def clear_temp_directory():
+    shutil.rmtree(temp_dir)
+    init_directories()
+
 def get_source_data_name(version, type=DataType.det, include_suffix=True):
     if(include_suffix):
         return Path(f'{data_suffix}_v{version}_{type.name}.zip')

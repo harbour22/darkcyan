@@ -92,9 +92,13 @@ def create_yolo_classification_dataset(version, letterbox=False):
         return
     temp_dir = Path(Config.get_value('temp_dir'))
 
-    output_directory = temp_dir / f"{Config.get_value('data_suffix')}_v{version}_classify"
+    output_directory = temp_dir / f"{Config.get_value('data_suffix')}_v{version}{'_lb' if letterbox else ''}_classify"
 
-    print(f'Creating YOLO classification dataset from {data_directory} using {temp_dir} in {output_directory}')
+    if(output_directory.exists()):
+        print(term.red(f'Classification dataset already exists for {version}'))
+        return
+
+    print(f'Creating YOLO classification dataset from {data_directory} and output to {output_directory}')
 
     train_dir_img = output_directory / 'train'
     test_dir_img = output_directory / 'test'
@@ -103,7 +107,7 @@ def create_yolo_classification_dataset(version, letterbox=False):
     if(not test_dir_img.exists()):
         test_dir_img.mkdir(parents=True)
 
-    classifiers_dirs = list(data_directory.glob(f'*/[!.]*'))
+    classifiers_dirs = list(data_directory.glob(f'[!.]*'))
 
     with Progress() as progress:
 
@@ -144,22 +148,34 @@ def create_yolo_classification_dataset(version, letterbox=False):
                 shutil.copy(filename, train_image_dir / filename.name)
             progress.update(train_task, visible=False)
 
-def create_classification_zipfile(version):
+def create_classification_zipfile(version, letterbox):
     init_directories()
     temp_dir = Path(Config.get_value('temp_dir'))
 
-    output_directory = temp_dir / f"{Config.get_value('data_suffix')}_v{version}_classify"
+    output_directory = temp_dir / get_zipfilename(version, letterbox)
     if(not output_directory.exists()):
         print(term.red(f'No data found for {version}'))
         return
     
     with Progress(transient=True) as progress:
         task1 = progress.add_task(f"[blue]Creating zip file for {version} from {output_directory}", total=None)
-        zip_filename = temp_dir / f"{Config.get_value('data_suffix')}_v{version}_classify"
+        zip_filename = temp_dir / get_zipfilename(version, letterbox)
         zipfile = shutil.make_archive(zip_filename, 'zip', root_dir=output_directory, base_dir='.')
         progress.update(task1, completed=1)
         return zipfile
-   
+    
+def create_or_get_classification_zipfile(version, letterbox):
+    init_directories()
+    temp_dir = Path(Config.get_value('temp_dir'))
+    zip_filename = temp_dir / (get_zipfilename(version, letterbox) + '.zip')
+    if(not zip_filename.exists()):
+        create_classification_zipfile(version, letterbox)
+    else:
+        print(f'Using existing {zip_filename}')
+    return zip_filename
+
+def get_zipfilename(version, letterbox=False):
+    return f"{Config.get_value('data_suffix')}_v{version}{'_lb' if letterbox else ''}_classify"
 
 def main():
     create_yolo_classification_dataset('4.1', False)

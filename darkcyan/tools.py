@@ -12,6 +12,10 @@ from local_data_utility import remove_scratch_version
 from local_data_utility import create_main_from_scratch
 from local_data_utility import get_local_zipfile_for_version
 from local_data_utility import get_local_scratch_directory_for_version
+from local_data_utility import clear_temp_directory
+
+from classify_data_utilities import create_yolo_classification_dataset
+from classify_data_utilities import create_or_get_classification_zipfile
 
 from config import Config
 
@@ -23,10 +27,12 @@ import difflib
 
 command_options =  ['Display available data',
                     'Create local working copy of data',
-                    'Launch labelImg',
-                    'Build master from local working copy',
+                    'Launch labelImg for detection data',
+                    'Build new master dataset from local working copy',
                     'Remove local working copy of data',
-                    'Prepare data for training']
+                    'Prepare data for training',
+                    'Upload to google drive',
+                    'Clear temp directory']
 
 term = Terminal()
 
@@ -57,6 +63,10 @@ def ask_for_data_version(datatype, tag):
         version = versions[int(term.inkey())-1]
         print(term.darkcyan(f'{version}'))
         return version
+
+def upload_to_google_drive():
+    pass
+
 
 def run_labelimg():
 
@@ -229,6 +239,35 @@ def remove_working_copy_of_data():
     display_available_data()
     print()     
 
+
+def prepare_data_for_training():
+    datatype = ask_for_dataset_type()
+    if(datatype == DataType.det):
+        #unsupported
+        print(term.red(f'{DataType.det.name} unsupported for now, any key to continue'))
+        return
+
+    version = ask_for_data_version(datatype, DataTag.scratch)
+
+    if(datatype == DataType.cls):
+        print(term.white(f'Use letterbox images? (y/n)'))
+        letterbox = True
+        with term.cbreak():
+            letterbox = term.inkey()
+            print(term.white(f'{letterbox}'))
+            if(letterbox != 'y'):
+                letterbox = False
+        create_yolo_classification_dataset(version, letterbox)
+        create_or_get_classification_zipfile(version, letterbox)
+            
+def remove_and_recreate_temp_directory():
+    with Progress(transient=True) as progress:
+        task1 = progress.add_task(f"[blue]Clearing and recreating the temp directory", total=None)
+        clear_temp_directory()
+        progress.update(task1, completed=1)
+        print(term.darkcyan(f'Cleared and recreating the temp directory'))
+
+
 if(__name__== '__main__'):
     print(term.clear())    
     print(term.black_on_darkcyan(('DarkCyan Tools')))
@@ -262,6 +301,16 @@ if(__name__== '__main__'):
             case '5':
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
                 remove_working_copy_of_data()
+            case '6':
+                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
+                prepare_data_for_training()
+                
+            case '7':
+                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
+                upload_to_google_drive()
+            case '8':
+                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))                
+                remove_and_recreate_temp_directory()
 
             case 'q':
                 print(term.darkcyan('Goodbye'))
