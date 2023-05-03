@@ -83,7 +83,26 @@ def upload_to_google_drive():
         print(term.red(f"{file_to_upload} not found to upload"))
         return
 
-    parent_dir = get_file_id(DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR, is_directory=True)
+    parent_dir = get_directory_id_from_path(DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR)
+
+    ## Delete existing files from google drive
+    existing_files = get_file_id(file_to_upload.name, parent_dir)
+    if existing_files:
+        print(
+            term.red(
+                f"Found existing {len(existing_files)} file(s) with name {file_to_upload.name} - overwrite? (y/N)"
+            )
+        )
+        with term.cbreak():
+            overwrite = term.inkey()
+            print(term.darkcyan(f"{overwrite}"))
+            if overwrite == "y":
+                for file in existing_files:
+                    delete_file(file["id"])
+                    print(term.white(f"Deleted {file}"))
+            else:
+                return
+
     upload_file(file_to_upload, parent_dir, mimetype="application/zip")
 
 
@@ -235,6 +254,7 @@ def author_new_dataset():
         )
         with term.cbreak():
             overwrite = term.inkey()
+            print(term.darkcyan(f"{overwrite}"))
             if overwrite != "y":
                 return
             remove_scratch_version(working_version, datatype)
@@ -263,6 +283,7 @@ def create_main_dataset_from_scratch():
         print(term.red(f"Found existing {zipfile} - overwrite? (y/N)"))
         with term.cbreak():
             overwrite = term.inkey()
+            print(term.darkcyan(f"{overwrite}"))
             if overwrite != "y":
                 return
             print(term.red(f"Overwriting {zipfile}"))
@@ -354,6 +375,7 @@ def create_colab_training_config():
             )
             with term.cbreak():
                 overwrite = term.inkey()
+                print(term.darkcyan(f"{overwrite}"))
                 if overwrite == "y":
                     for file in existing_files:
                         delete_file(file["id"])
@@ -420,6 +442,7 @@ def run():
     print_command_menu()
     while True:
         print()
+        print(term.white(f"Select an option: {term.blue(f'(m for menu, q to quit)')}"))
         inp = ""
         with term.cbreak():
             inp = term.inkey()
