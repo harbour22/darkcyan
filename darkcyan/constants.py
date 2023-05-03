@@ -17,6 +17,15 @@ YOLOBATCHSIZEMAP = {
     }
 }
 
+YOLOMODELMAP = {
+    DataType.cls: {
+        YoloBaseModels.xlarge: "yolov8x.pt",
+        YoloBaseModels.large: "yolov8l.pt",
+        YoloBaseModels.medium: "yolov8m.pt",
+        YoloBaseModels.small: "yolov8s.pt",
+        YoloBaseModels.nano: "yolov8n.pt",
+    }
+}
 
 DEFAULT_DATA_PREFIX = "limetree"
 DEFAULT_DET_SRC_NAME = "images_det_src"
