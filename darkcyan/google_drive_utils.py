@@ -149,6 +149,6 @@ if __name__ == "__main__":
         delete_file(file["id"])
 
     # temp_dir = Path(Config.get_value('temp_dir'))
-    # zip_filename = temp_dir / f"{Config.get_value('data_suffix')}_v{version}_classify.zip"
+    # zip_filename = temp_dir / f"{Config.get_value('data_prefix')}_v{version}_classify.zip"
     # version = 4.1
     # upload_file(zip_filename, parent_directory_id)

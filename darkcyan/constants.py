@@ -18,7 +18,7 @@ YOLOBATCHSIZEMAP = {
 }
 
 
-DEFAULT_DATA_SUFFIX = "limetree"
+DEFAULT_DATA_PREFIX = "limetree"
 DEFAULT_DET_SRC_NAME = "images_det_src"
 DEFAULT_CLS_SRC_NAME = "images_cls_src"
 DEFAULT_CLASSES_TXT = "classes.txt"
@@ -27,4 +27,4 @@ DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR = "yolo/training_data"
 DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR = "yolo/runtime_config"
 DEFAULT_GOOGLEDRIVE_SCOPE = ["https://www.googleapis.com/auth/drive"]
 
-DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_SUFFIX}_yolo_training_config.json"
+DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_PREFIX}_yolo_training_config.json"
