@@ -358,6 +358,8 @@ def create_colab_training_config():
                     for file in existing_files:
                         delete_file(file["id"])
                         print(term.white(f"Deleted {file}"))
+                else:
+                    return
 
         upload_file(config_file, google_parent_dir, "application/json")
         print(term.white(f"Uploaded {config_file} to {google_parent_dir}"))

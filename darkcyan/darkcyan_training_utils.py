@@ -20,6 +20,7 @@ def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano
     config["version"] = version
     config["type"] = type.name
     config["basemodel"] = basemodel.name
+    config["epochs"] = Config.get_value("training_epochs")
     config["batchsize"] = YOLOBATCHSIZEMAP[type][basemodel]
     config["creation_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     config["created_by"] = getpass.getuser()
