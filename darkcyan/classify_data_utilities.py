@@ -27,7 +27,7 @@ def generate_letterbox_images(version):
         return
     letterbox_dir = (
         temp_dir
-        / f"{Path(Config.get_value('data_suffix'))}_v{version}lb_cls"
+        / f"{Path(Config.get_value('data_prefix'))}_v{version}lb_cls"
         / DEFAULT_CLS_SRC_NAME
     )
     if letterbox_dir.exists():
@@ -100,7 +100,7 @@ def create_yolo_classification_dataset(version, letterbox=False):
 
     output_directory = (
         temp_dir
-        / f"{Config.get_value('data_suffix')}_v{version}{'lb' if letterbox else ''}_{DataType.cls.name}_train"
+        / f"{Config.get_value('data_prefix')}_v{version}{'lb' if letterbox else ''}_{DataType.cls.name}_train"
     )
 
     if output_directory.exists():
@@ -201,7 +201,7 @@ def create_or_get_classification_zipfile(version, letterbox):
 
 
 def get_zipfilename(version, letterbox=False):
-    return f"{Config.get_value('data_suffix')}_v{version}{'lb' if letterbox else ''}_{DataType.cls.name}"
+    return f"{Config.get_value('data_prefix')}_v{version}{'lb' if letterbox else ''}_{DataType.cls.name}"
 
 
 def main():
