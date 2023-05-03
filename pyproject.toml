@@ -5,6 +5,7 @@ description = "Utilities and tooling for the ML darkcyan project"
 authors = ["Chris <developer@harbour22.uk>"]
 license = "BSD 3-Clause License"
 readme = "README.md"
+packages = ["darkcyan-tools"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
