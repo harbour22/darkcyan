@@ -9,22 +9,8 @@ from PIL import Image, ImageOps
 from rich.progress import Progress
 
 from .config import Config
-from .constants import (
-    DEFAULT_CLASSES_TXT,
-    DEFAULT_CLS_SRC_NAME,
-    DEFAULT_DET_SRC_NAME,
-    DataTag,
-    DataType,
-)
-from .local_data_utils import (
-    create_main_from_scratch,
-    get_available_data_versions,
-    get_local_scratch_directory_for_version,
-    get_local_zipfile_for_version,
-    init_directories,
-    prepare_working_directory,
-    remove_scratch_version,
-)
+from .constants import DEFAULT_CLS_SRC_NAME, DataType
+from .local_data_utils import get_local_scratch_directory_for_version, init_directories
 
 term = Terminal()
 
