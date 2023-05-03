@@ -315,7 +315,7 @@ if(__name__== '__main__'):
                 upload_to_google_drive()
             case '8':
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                print(term.red(f'Not implemented yet')
+                print(term.red(f'Not implemented yet'))
             case '9':
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))                
                 remove_and_recreate_temp_directory()
