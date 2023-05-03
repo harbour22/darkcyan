@@ -11,7 +11,8 @@ from googleapiclient.http import MediaFileUpload
 
 from config import Config 
 from constants import DEFAULT_CONFIG_DIR
-from constants import DEFAULT_GOOGLEDRIVE_YOLO_DIR
+from constants import DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR
+from constants import DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR
 from constants import DEFAULT_GOOGLEDRIVE_SCOPE
 
 from pathlib import Path
@@ -40,15 +41,12 @@ def get_credentials():
             token.write(creds.to_json())
     return creds
 
-def get_directory_id(dir_name, is_root = False, parent_directory_id = None):
+def get_file_id(file_name, parent_directory_id = None, is_root = False, is_directory = False):
     if(not is_root and parent_directory_id is None):
-        raise ValueError('parent_directory_id must be provided if is_root is False')
+            raise ValueError("parent_directory_id must be provided if is_root is False")
+         
+    query = f"mimeType {'=' if is_directory else '!='} 'application/vnd.google-apps.folder' and '{'root' if is_root else parent_directory_id}' in parents and name = '{file_name}' and trashed = false"
     
-    if(is_root):
-        query = f"mimeType='application/vnd.google-apps.folder' and 'root' in parents and name = '{dir_name}'"
-    else:
-        query = f"mimeType='application/vnd.google-apps.folder' and '{parent_directory_id}' in parents and name = '{dir_name}'"
-
     creds = get_credentials()
     try:
         service = build('drive', 'v3', credentials=creds)
@@ -59,29 +57,42 @@ def get_directory_id(dir_name, is_root = False, parent_directory_id = None):
         items = results.get('files', [])
 
         if not items:
-            print('No files found.')
-            return None
-        if len(items) > 1:
-            print(f'Illogical Query, more than one file found {items}')
-            raise ValueError('Illogical Query, more than one file found')
+            print(f'Unable to find {file_name} on the drive for parent_directory_id {parent_directory_id}')
+            return[]
         
-        return items[0]['name'], items[0]['id']
+        return items
+
+    except HttpError as error:
+        raise error
+
+def delete_file(file_id):
+    creds = get_credentials()
+    try:
+        service = build('drive', 'v3', credentials=creds)
+
+        # Call the Drive v3 API
+        service.files().delete(fileId=file_id).execute()
+        print(f'{file_id} deleted')
 
     except HttpError as error:
         raise error
 
 
-def get_parent_directory_id(parent_directory_path):
+def get_directory_id_from_path(parent_directory_path):
     creds = get_credentials()
 
     parent_directory_id = None
     for location in parent_directory_path.split('/'):
-        parent_directory_name, parent_directory_id = get_directory_id(location, is_root = True if parent_directory_path.index(location) == 0 else False, 
-                                               parent_directory_id = parent_directory_id)
+        files = get_file_id(location, is_root = True if parent_directory_path.index(location) == 0 else False, 
+                                               parent_directory_id = parent_directory_id, is_directory = True)
+        if(len(files) > 1):
+            raise ValueError(f'Multiple directories found with name {location} in parent_directory_id {parent_directory_id}')
+        parent_directory_name = files[0]['name']
+        parent_directory_id = files[0]['id']
         print(f'parent_directory_name: {parent_directory_name}, parent_directory_id: {parent_directory_id}')
     return parent_directory_id
 
-def upload_zip(upload_file_path, parent_id):
+def upload_file(upload_file_path, parent_id, mimetype='application/zip'):
 
     creds = get_credentials()
     with Progress(transient=True) as progress:
@@ -93,14 +104,12 @@ def upload_zip(upload_file_path, parent_id):
 
             file_metadata = {'name': upload_file_path.name, 'parents':[parent_id]}
             media = MediaFileUpload(upload_file_path,
-                                    mimetype='application/zip', resumable=True)
+                                    mimetype=mimetype, resumable=True)
             # pylint: disable=maybe-no-member
             
             file = service.files().create(body=file_metadata, media_body=media,
                                     fields='id').execute()
             progress.update(task1, completed=1)    
-            
-            print(f'File ID: {file.get("id")}')
 
         except HttpError as error:
             print(F'An error occurred: {error}')
@@ -110,8 +119,13 @@ def upload_zip(upload_file_path, parent_id):
         return file.get('id')
 
 if __name__ == '__main__':
-    parent_directory_id = get_parent_directory_id(f'{DEFAULT_GOOGLEDRIVE_YOLO_DIR}/cls')
-    temp_dir = Path(Config.get_value('temp_dir'))
-    version = 4.1
-    zip_filename = temp_dir / f"{Config.get_value('data_suffix')}_v{version}_classify.zip"
-    upload_zip(zip_filename, parent_directory_id)
+    parent_directory_id = get_directory_id_from_path(f'{DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR}')
+    files = get_file_id('limetree_yolo_training_config.json', parent_directory_id)
+    print(files)
+    for file in files:
+        delete_file(file['id'])
+
+    #temp_dir = Path(Config.get_value('temp_dir'))
+    #zip_filename = temp_dir / f"{Config.get_value('data_suffix')}_v{version}_classify.zip"
+    #version = 4.1
+    #upload_file(zip_filename, parent_directory_id)

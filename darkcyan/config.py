@@ -11,9 +11,10 @@ from constants import DataTag
 DEFAULT_CONFIG = {f'scratch_dir': (Path.home() / 'developer' / 'darkcyan_data' / 'scratch' ).as_posix(),
                   'temp_dir': (Path.home() / 'developer' / 'darkcyan_data' / 'temp').as_posix(),
                   'local_data_repository': (Path.home() / 'developer' / 'darkcyan_data' / 'main').as_posix(),
-                  'data_suffix': 'limetree',
+                  'data_prefix': 'limetree',
                   'labelImg_cmd': ['labelImg'],
-                  'test_ratio':0.2
+                  'test_ratio':0.2,
+                  'training_epochs': 300,
                   }
 
 class Config:

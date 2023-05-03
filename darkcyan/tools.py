@@ -5,35 +5,36 @@ from constants import DataType
 from constants import DataTag
 from constants import DEFAULT_DET_SRC_NAME
 from constants import DEFAULT_CLASSES_TXT
-from local_data_utility import display_available_data
-from local_data_utility import get_available_data_versions
-from local_data_utility import prepare_working_directory
-from local_data_utility import remove_scratch_version
-from local_data_utility import create_main_from_scratch
-from local_data_utility import get_local_zipfile_for_version
-from local_data_utility import get_local_scratch_directory_for_version
-from local_data_utility import clear_temp_directory
+from constants import YoloBaseModels
+from constants import DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR
+from constants import DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR
+
+from local_data_utils import display_available_data
+from local_data_utils import get_available_data_versions
+from local_data_utils import prepare_working_directory
+from local_data_utils import remove_scratch_version
+from local_data_utils import create_main_from_scratch
+from local_data_utils import get_local_zipfile_for_version
+from local_data_utils import get_local_scratch_directory_for_version
+from local_data_utils import clear_temp_directory
 
 from classify_data_utilities import create_yolo_classification_dataset
 from classify_data_utilities import create_or_get_classification_zipfile
+
+from darkcyan_training_utils import create_config_file
+
+from google_drive_utils import upload_file
+from google_drive_utils import get_file_id
+from google_drive_utils import get_directory_id_from_path
+from google_drive_utils import delete_file 
+
 
 from config import Config
 
 from pathlib import Path
 import shutil
 import difflib
-
-
-
-command_options =  ['Display available data',
-                    'Create local working copy of data',
-                    'Launch labelImg for detection data',
-                    'Build new master dataset from local working copy',
-                    'Remove local draft data',
-                    'Prepare data for training from local working copy',
-                    'Upload data to google drive',
-                    'Create colab training command'
-                    'Clear temp directory']
+import sys
 
 term = Terminal()
 
@@ -66,7 +67,16 @@ def ask_for_data_version(datatype, tag):
         return version
 
 def upload_to_google_drive():
-    pass
+    datatype = ask_for_dataset_type()
+    version = ask_for_data_version(datatype, DataTag.temp)
+    
+    file_to_upload = get_local_zipfile_for_version(version, datatype,tag=DataTag.temp)
+    if(not file_to_upload.exists()):
+        print(term.red(f'{file_to_upload} not found to upload'))
+        return
+    
+    parent_dir = get_file_id(DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR, is_directory=True)
+    upload_file(file_to_upload, parent_dir, mimetype = 'application/zip')
 
 
 def run_labelimg():
@@ -268,11 +278,73 @@ def remove_and_recreate_temp_directory():
         progress.update(task1, completed=1)
         print(term.darkcyan(f'Cleared and recreating the temp directory'))
 
+def create_colab_training_config():
+    datatype = ask_for_dataset_type()
+    version = ask_for_data_version(datatype, DataTag.temp)
+
+    print(term.white(f'Select modelsize to train'))
+    for choice, model in enumerate(YoloBaseModels, start=1):
+        print(term.white(f'{choice}: {model.name}'))
+    
+    with term.cbreak():
+        choice = term.inkey()
+        if(choice not in [str(i) for i in range(1, len(YoloBaseModels)+1)]):
+            print(term.red(f'Illogical choice {choice}'))
+            return
+
+        basemodel = YoloBaseModels(int(choice))
+
+        config_file = create_config_file(version, datatype, basemodel)
+        google_parent_dir = get_directory_id_from_path(DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR)
+        ## Delete existing files from google drive
+        existing_files = get_file_id(config_file.name, google_parent_dir)
+        if(existing_files):
+            print(term.red(f'Found existing {len(existing_files)} file(s) with name {config_file.name} - overwrite? (y/N)'))
+            with term.cbreak():
+                overwrite = term.inkey()
+                if(overwrite == 'y'):
+                    
+                    for file in existing_files:
+                        delete_file(file['id'])
+                        print(term.white(f'Deleted {file}'))
+
+        upload_file(config_file, google_parent_dir, 'application/json')
+        print(term.white(f'Uploaded {config_file} to {google_parent_dir}'))
+
+
 def print_command_menu():
     print()
-    for choice, description in enumerate(command_options, start=1):
-        print(term.white(f'{choice}: {description}'))
-    
+
+    for choice, description, func in command_options:
+        if(not choice):
+            print(term.yellow(f'{description}'))
+        else:
+            print(term.white(f'{choice}: {description}'))
+
+def quit():
+    print(term.white(f'Bye!'))
+    sys.exit(0)
+
+
+command_options =  [('' ,'=== Data Generation and Management ===', None),
+                    ('1','Display available data', display_available_data),
+                    ('2','Create local working copy of data', author_new_dataset),
+                    ('3','Launch labelImg for detection data', run_labelimg),
+                    ('','',None),
+                    ('', '=== Training Data Manipulation ===', None),                    
+                    ('4','Build new master dataset from local working copy', create_main_dataset_from_scratch),
+                    ('5','Remove local working copy', remove_working_copy_of_data),
+                    ('6','Prepare data for training from local working copy', prepare_data_for_training),
+                    ('','',None),
+                    ('', '=== Cloud Upload and Training ===', None),
+                    ('7','Upload data to google drive', upload_to_google_drive),
+                    ('8','Create colab training command and upload to google drive', create_colab_training_config),
+                    ('','',None),
+                    ('', '=== Utilities ===', None),
+                    ('9','Clear temp directory',remove_and_recreate_temp_directory),
+                    ('m','Show full menu', print_command_menu),
+                    ('q','Quit', quit)
+                    ]
 
 
 if(__name__== '__main__'):
@@ -280,51 +352,20 @@ if(__name__== '__main__'):
     print(term.black_on_darkcyan(('DarkCyan Tools')))
     print_command_menu()
     while True:
-
-        print(term.white(f'm: Show full menu'))
-        print(term.white(f'q: Quit'))
         
         print()
         inp=''
         with term.cbreak():
             inp = term.inkey()
-        match inp:
-            case '1':
-                print()
-                display_available_data()
-                print()
+            print(term.white(f'{inp}'))
 
-            case '2':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                author_new_dataset()
-            case '3':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                run_labelimg()
-            case '4':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                create_main_dataset_from_scratch()
-            case '5':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                remove_working_copy_of_data()
-            case '6':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                prepare_data_for_training()
-                
-            case '7':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                upload_to_google_drive()
-            case '8':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
-                print(term.red(f'Not implemented yet'))
-            case '9':
-                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))                
-                remove_and_recreate_temp_directory()
+            command = [command for command in command_options if command[0] == inp]
+            if(len(command) == 0):
+                print(term.red(f'Illogical choice {inp}'))
+                continue
 
-            case 'q':
-                print(term.darkcyan('Goodbye'))
-                break
-            case 'm': 
-                print_command_menu()
-            case _:
-                print(term.red('Invalid option {inp}'))
-            
+            command = command[0] ## In case we have multiple commands mapped to the same key
+
+            print(term.white(f'Running '+term.blue(f'{command[1]}')))
+            command[2]()
+

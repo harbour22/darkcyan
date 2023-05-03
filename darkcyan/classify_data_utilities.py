@@ -11,13 +11,13 @@ from constants import DataTag
 from constants import DEFAULT_DET_SRC_NAME
 from constants import DEFAULT_CLS_SRC_NAME
 from constants import DEFAULT_CLASSES_TXT
-from local_data_utility import init_directories
-from local_data_utility import get_available_data_versions
-from local_data_utility import prepare_working_directory
-from local_data_utility import remove_scratch_version
-from local_data_utility import create_main_from_scratch
-from local_data_utility import get_local_zipfile_for_version
-from local_data_utility import get_local_scratch_directory_for_version
+from local_data_utils import init_directories
+from local_data_utils import get_available_data_versions
+from local_data_utils import prepare_working_directory
+from local_data_utils import remove_scratch_version
+from local_data_utils import create_main_from_scratch
+from local_data_utils import get_local_zipfile_for_version
+from local_data_utils import get_local_scratch_directory_for_version
 
 from config import Config
 
@@ -33,11 +33,11 @@ term = Terminal()
 def generate_letterbox_images(version):
     init_directories()
     temp_dir = Path(Config.get_value('temp_dir'))
-    data_directory = get_local_scratch_directory_for_version(version, DataType.cls)
+    data_directory = get_local_scratch_directory_for_version(version, DataType.cls) / DEFAULT_CLS_SRC_NAME
     if(not data_directory.exists()):
         print(term.red(f'No data found for {version}'))
         return
-    letterbox_dir = temp_dir / 'images_cls_letterbox_src' / DEFAULT_CLS_SRC_NAME
+    letterbox_dir = temp_dir / f"{Path(Config.get_value('data_suffix'))}_v{version}lb_cls" / DEFAULT_CLS_SRC_NAME
     if(letterbox_dir.exists()):
         print(term.red(f'Letterbox images already exist for {version}'))
         return letterbox_dir
@@ -47,7 +47,7 @@ def generate_letterbox_images(version):
     if(not letterbox_dir.exists()):
         letterbox_dir.mkdir(parents=True)  
 
-    classifiers_dirs = list(data_directory.glob(f'*/[!.]*'))
+    classifiers_dirs = list(data_directory.glob(f'[!.]*'))
 
     with Progress() as progress:
 
@@ -86,16 +86,17 @@ def create_yolo_classification_dataset(version, letterbox=False):
     if(letterbox):        
         data_directory = generate_letterbox_images(version)
     else:
-        data_directory = get_local_scratch_directory_for_version(version, DataType.cls)
+        data_directory = get_local_scratch_directory_for_version(version, DataType.cls) / DEFAULT_CLS_SRC_NAME
     if(not data_directory.exists()):
         print(term.red(f'No data found for {version}'))
         return
     temp_dir = Path(Config.get_value('temp_dir'))
 
-    output_directory = temp_dir / f"{Config.get_value('data_suffix')}_v{version}{'_lb' if letterbox else ''}_classify"
+    output_directory = temp_dir / f"{Config.get_value('data_suffix')}_v{version}{'lb' if letterbox else ''}_{DataType.cls.name}_train"
+
 
     if(output_directory.exists()):
-        print(term.red(f'Classification dataset already exists for {version}'))
+        print(term.red(f'Classification dataset already exists for {version} in  {output_directory}'))
         return
 
     print(f'Creating YOLO classification dataset from {data_directory} and output to {output_directory}')
@@ -152,15 +153,15 @@ def create_classification_zipfile(version, letterbox):
     init_directories()
     temp_dir = Path(Config.get_value('temp_dir'))
 
-    output_directory = temp_dir / get_zipfilename(version, letterbox)
-    if(not output_directory.exists()):
-        print(term.red(f'No data found for {version}'))
+    input_directory = temp_dir / f'{get_zipfilename(version, letterbox)}_train'
+    if(not input_directory.exists()):
+        print(term.red(f'No data found for {version}, expected it {input_directory}'))
         return
     
-    with Progress(transient=True) as progress:
-        task1 = progress.add_task(f"[blue]Creating zip file for {version} from {output_directory}", total=None)
+    with Progress(transient=False) as progress:
+        task1 = progress.add_task(f"[blue]Creating zip file for {version} from {input_directory}", total=None)
         zip_filename = temp_dir / get_zipfilename(version, letterbox)
-        zipfile = shutil.make_archive(zip_filename, 'zip', root_dir=output_directory, base_dir='.')
+        zipfile = shutil.make_archive(zip_filename, 'zip', root_dir=input_directory, base_dir='.')
         progress.update(task1, completed=1)
         return zipfile
     
@@ -175,7 +176,7 @@ def create_or_get_classification_zipfile(version, letterbox):
     return zip_filename
 
 def get_zipfilename(version, letterbox=False):
-    return f"{Config.get_value('data_suffix')}_v{version}{'_lb' if letterbox else ''}_classify"
+    return f"{Config.get_value('data_suffix')}_v{version}{'lb' if letterbox else ''}_{DataType.cls.name}"
 
 def main():
     create_yolo_classification_dataset('4.1', False)
