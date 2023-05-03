@@ -136,7 +136,7 @@ def display_available_data():
             version_root = type_root.add(datatype.name)
             versions = get_available_data_versions(datatype, tag)
             for version in versions:
-                version_root.add(term.yellow_on_black(f'{version}'))
+                version_root.add(term.green(f'{version}'))
 
     
 
