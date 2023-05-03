@@ -117,7 +117,7 @@ def get_available_data_versions(type=DataType.det, version=DataTag.main):
 def display_available_data():
     """ Query the local data cache and display available data """
     tree_root = Tree(term.black_on_cyan("Available Data"))
-    master_root = tree_root.add(term.darkcyan(f"Master ")+term.cyan(f"({local_data_repository})"))
+    master_root = tree_root.add(term.darkcyan(f"Local Master Data ")+term.cyan(f"({local_data_repository})"))
 
     for datatype in DataType:        
         type_root = master_root.add(datatype.name)
@@ -126,7 +126,7 @@ def display_available_data():
         for version in versions:                            
             type_root.add(term.yellow_on_black(f'{version}'))       
         
-    scratch_root = tree_root.add(term.darkcyan(f"Scratch ")+term.cyan(f"({scratch_dir})"))
+    scratch_root = tree_root.add(term.darkcyan(f"Draft Data ")+term.cyan(f"({scratch_dir})"))
 
     for datatype in DataType:
         

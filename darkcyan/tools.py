@@ -29,9 +29,10 @@ command_options =  ['Display available data',
                     'Create local working copy of data',
                     'Launch labelImg for detection data',
                     'Build new master dataset from local working copy',
-                    'Remove local working copy of data',
-                    'Prepare data for training',
-                    'Upload to google drive',
+                    'Remove local draft data',
+                    'Prepare data for training from local working copy',
+                    'Upload data to google drive',
+                    'Create colab training command'
                     'Clear temp directory']
 
 term = Terminal()
@@ -267,16 +268,20 @@ def remove_and_recreate_temp_directory():
         progress.update(task1, completed=1)
         print(term.darkcyan(f'Cleared and recreating the temp directory'))
 
+def print_command_menu():
+    print()
+    for choice, description in enumerate(command_options, start=1):
+        print(term.white(f'{choice}: {description}'))
+    
+
 
 if(__name__== '__main__'):
     print(term.clear())    
     print(term.black_on_darkcyan(('DarkCyan Tools')))
-
+    print_command_menu()
     while True:
-        
-        print()
-        for choice, description in enumerate(command_options, start=1):
-            print(term.white(f'{choice}: {description}'))
+
+        print(term.white(f'm: Show full menu'))
         print(term.white(f'q: Quit'))
         
         print()
@@ -309,13 +314,17 @@ if(__name__== '__main__'):
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
                 upload_to_google_drive()
             case '8':
+                print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))
+                print(term.red(f'Not implemented yet')
+            case '9':
                 print(term.white(f'Running '+term.blue(f'{command_options[int(inp)-1]}')))                
                 remove_and_recreate_temp_directory()
 
             case 'q':
                 print(term.darkcyan('Goodbye'))
-
                 break
+            case 'm': 
+                print_command_menu()
             case _:
-                print(term.red('Invalid option'))
+                print(term.red('Invalid option {inp}'))
             

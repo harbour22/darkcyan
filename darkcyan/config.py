@@ -6,8 +6,9 @@ import getpass
 import os
 
 from constants import DEFAULT_CONFIG_DIR
+from constants import DataTag
 
-DEFAULT_CONFIG = {'scratch_dir': (Path.home() / 'developer' / 'darkcyan_data' / 'scratch').as_posix(),
+DEFAULT_CONFIG = {f'scratch_dir': (Path.home() / 'developer' / 'darkcyan_data' / 'scratch' ).as_posix(),
                   'temp_dir': (Path.home() / 'developer' / 'darkcyan_data' / 'temp').as_posix(),
                   'local_data_repository': (Path.home() / 'developer' / 'darkcyan_data' / 'main').as_posix(),
                   'data_suffix': 'limetree',
