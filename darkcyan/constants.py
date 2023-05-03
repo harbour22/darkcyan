@@ -19,11 +19,11 @@ YOLOBATCHSIZEMAP = {
 
 YOLOMODELMAP = {
     DataType.cls: {
-        YoloBaseModels.xlarge: "yolov8x.pt",
-        YoloBaseModels.large: "yolov8l.pt",
-        YoloBaseModels.medium: "yolov8m.pt",
-        YoloBaseModels.small: "yolov8s.pt",
-        YoloBaseModels.nano: "yolov8n.pt",
+        YoloBaseModels.xlarge: "yolov8x-cls.pt",
+        YoloBaseModels.large: "yolov8l-cls.pt",
+        YoloBaseModels.medium: "yolov8m-cls.pt",
+        YoloBaseModels.small: "yolov8s-cls.pt",
+        YoloBaseModels.nano: "yolov8n-cls.pt",
     }
 }
 
@@ -34,7 +34,7 @@ DEFAULT_CLASSES_TXT = "classes.txt"
 GOOGLEDRIVE_DATA_ROOT = "/content/drive/MyDrive"
 DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR = "yolo/training_data"
 DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR = "yolo/runtime_config"
-DEFAULT_GOOGLEDRIVE_YOLO_TRAINING_OUTPUT_DIR = "training_output"
+DEFAULT_GOOGLEDRIVE_YOLO_TRAINING_OUTPUT_DIR = "yolo/training_output"
 DEFAULT_GOOGLEDRIVE_SCOPE = ["https://www.googleapis.com/auth/drive"]
 
 DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_PREFIX}_yolo_training_config.json"
