@@ -5,9 +5,12 @@ from pathlib import Path
 
 from blessed import Terminal
 from rich.progress import Progress
+from rich.traceback import install
+
+install(show_locals=True)
 
 from darkcyan.classify_data_utilities import (
-    create_or_get_classification_zipfile,
+    create_classification_zipfile,
     create_yolo_classification_dataset,
 )
 from darkcyan.config import Config
@@ -321,18 +324,20 @@ def prepare_data_for_training():
         print(term.red(f"{DataType.det.name} unsupported for now, any key to continue"))
         return
 
-    version = ask_for_data_version(datatype, DataTag.scratch)
+    src_version = training_version = ask_for_data_version(datatype, DataTag.scratch)
 
     if datatype == DataType.cls:
-        print(term.white(f"Use letterbox images? (y/n)"))
-        letterbox = True
+        print(term.white(f"Create/use letterbox version? (y/n)"))
+        use_letterbox = False
         with term.cbreak():
             letterbox = term.inkey()
             print(term.white(f"{letterbox}"))
-            if letterbox != "y":
-                letterbox = False
-        create_yolo_classification_dataset(version, letterbox)
-        create_or_get_classification_zipfile(version, letterbox)
+            if letterbox == "y":
+                use_letterbox = True
+                training_version = f"{src_version}lb"
+
+        create_yolo_classification_dataset(src_version, training_version, use_letterbox)
+        create_classification_zipfile(training_version)
 
 
 def remove_and_recreate_temp_directory():
@@ -394,7 +399,7 @@ def print_command_menu():
         if not choice:
             print(term.yellow(f"{description}"))
         else:
-            print(term.white(f"{choice}: {description}"))
+            print(term.blue(f"{choice}: {description}"))
 
 
 def quit():
@@ -438,7 +443,7 @@ command_options = [
 
 def run():
     print(term.clear())
-    print(term.black_on_darkcyan(("DarkCyan Tools")))
+    print(term.darkcyan(("DarkCyan Tools")))
     print_command_menu()
     while True:
         print()

@@ -19,6 +19,7 @@ def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano
     config = {}
     config["version"] = version
     config["type"] = type.name
+    config["training_data"] = get_training_zip_name(version, type, True)
     config["basemodel"] = basemodel.name
     config["epochs"] = Config.get_value("training_epochs")
     config["imgsz"] = 224 if type == DataType.cls else 640
@@ -34,6 +35,18 @@ def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano
         json.dump(config, f, ensure_ascii=False, indent=4)
 
     return config_file
+
+
+def get_training_zip_name(version, type=DataType.det, append_extension=False):
+    return f"{Config.get_value('data_prefix')}_v{version}_{type.name}{'.zip' if append_extension else ''}"
+
+
+def get_training_data_src_directory(training_version, type):
+    temp_dir = Path(Config.get_value("temp_dir"))
+    return (
+        temp_dir
+        / f"{Config.get_value('data_prefix')}_v{training_version}_{type.name}_train"
+    )
 
 
 def main():
