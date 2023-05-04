@@ -31,10 +31,14 @@ def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano
     temp_dir = Path(Config.get_value("temp_dir"))
     config_file = temp_dir / DEFAULT_YOLO_TRAINING_CONFIG
 
-    with open(config_file, "w", encoding="utf-8") as f:
-        json.dump(config, f, ensure_ascii=False, indent=4)
+    save_config(config, config_file)
 
     return config_file
+
+
+def save_config(config, dest_file):
+    with open(dest_file, "w", encoding="utf-8") as f:
+        json.dump(config, f, ensure_ascii=False, indent=4)
 
 
 def get_training_zip_name(version, type=DataType.det, append_extension=False):
