@@ -35,6 +35,7 @@ GOOGLEDRIVE_DATA_ROOT = "/content/drive/MyDrive"
 DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR = "yolo/training_data"
 DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR = "yolo/runtime_config"
 DEFAULT_GOOGLEDRIVE_YOLO_TRAINING_OUTPUT_DIR = "yolo/training_output"
+DEFAULT_GOOGLEDRIVE_YOLO_ENGINE_DIR = "yolo/engines"
 DEFAULT_GOOGLEDRIVE_SCOPE = ["https://www.googleapis.com/auth/drive"]
 
 DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_PREFIX}_yolo_training_config.json"
