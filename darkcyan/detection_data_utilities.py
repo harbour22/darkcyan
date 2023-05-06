@@ -9,14 +9,13 @@ from blessed import Terminal
 from PIL import Image, ImageOps
 from rich.progress import Progress
 
-from .common_data_utils import create_training_zipfile
 from .config import Config
 from .constants import DEFAULT_DET_SRC_NAME, DEFAULT_DET_TRAINING_YAML, DataType
 from .darkcyan_training_utils import (
+    create_training_zipfile,
     get_training_data_src_directory,
-    get_training_zip_name,
 )
-from .local_data_utils import get_local_scratch_directory_for_version, init_directories
+from .local_data_utils import get_local_scratch_directory_for_version
 
 term = Terminal()
 
