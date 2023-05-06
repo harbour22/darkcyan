@@ -92,7 +92,7 @@ def get_local_zipfile_for_version(
         parent = scratch_dir
     else:
         parent = temp_dir
-    source_data_filename = get_source_data_name(version, type, True)
+    source_data_filename = get_source_data_name(version, type, include_suffix)
     source_data_file = parent / source_data_filename
     return source_data_file
 

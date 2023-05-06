@@ -17,7 +17,7 @@ DEFAULT_CONFIG = {
         Path.home() / "developer" / "darkcyan_data" / "main"
     ).as_posix(),
     "data_prefix": "limetree",
-    "labelImg_cmd": ["labelImg"],
+    "labelImg_cmd": "labelImg",
     "cls_test_ratio": 0.2,
     "det_test_ratio": 0.2,
     "training_epochs": 300,

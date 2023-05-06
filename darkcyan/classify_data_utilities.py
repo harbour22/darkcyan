@@ -67,7 +67,7 @@ def generate_letterbox_images(src_version, training_version):
                 w, h = img.size
                 if w < h:
                     img = img.resize(
-                        [int(w * (224 / h)), 224], PIL.Image.Resampling.LANCZOS
+                        [int(w * (224 / h)), 224], PIL.Image.BICUBIC
                     )
                     w, h = img.size
                     img = ImageOps.expand(
@@ -75,14 +75,14 @@ def generate_letterbox_images(src_version, training_version):
                     )
                 else:
                     img = img.resize(
-                        [224, int(h * (224 / w))], PIL.Image.Resampling.LANCZOS
+                        [224, int(h * (224 / w))], PIL.Image.BICUBIC
                     )
                     w, h = img.size
                     img = ImageOps.expand(
                         img, border=(0, int((224 - h) / 2)), fill="black"
                     )
 
-                img = img.resize([224, 224], PIL.Image.Resampling.LANCZOS)
+                img = img.resize([224, 224], PIL.Image.BICUBIC)
                 img.save(target_dir / image_path.name)
             progress.update(letterbox_task, visible=False)
     return letterbox_dir
@@ -127,6 +127,8 @@ def create_yolo_classification_dataset(
 
     classifiers_dirs = list(data_directory.glob(f"[!.]*"))
 
+    classifiers = []
+
     with Progress() as progress:
         for img_class_dir in classifiers_dirs:
             image_list = list(img_class_dir.glob(f"*.[jpg|jpeg|png]*"))
@@ -141,6 +143,7 @@ def create_yolo_classification_dataset(
                 print(f"Insufficient test images for {img_class_dir.name}, skipping")
                 continue
 
+            classifiers.append(img_class_dir.name)
             if not test_image_dir.exists():
                 test_image_dir.mkdir(parents=True)
 
@@ -169,6 +172,10 @@ def create_yolo_classification_dataset(
                 progress.advance(train_task)
                 shutil.copy(filename, train_image_dir / filename.name)
             progress.update(train_task, visible=False)
+    classifiers.sort()
+    for classnum, classifier in enumerate(classifiers):
+        print(f"class{classnum}: '{classifier}'")
+    
 
     return training_version
 
