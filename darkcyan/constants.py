@@ -14,7 +14,14 @@ YOLOBATCHSIZEMAP = {
         YoloBaseModels.medium: 128,
         YoloBaseModels.small: 128,
         YoloBaseModels.nano: 256,
-    }
+    },
+    DataType.det: {
+        YoloBaseModels.xlarge: 16,
+        YoloBaseModels.large: 24,
+        YoloBaseModels.medium: 32,
+        YoloBaseModels.small: 64,
+        YoloBaseModels.nano: 128,
+    },
 }
 
 YOLOMODELMAP = {
@@ -24,7 +31,14 @@ YOLOMODELMAP = {
         YoloBaseModels.medium: "yolov8m-cls.pt",
         YoloBaseModels.small: "yolov8s-cls.pt",
         YoloBaseModels.nano: "yolov8n-cls.pt",
-    }
+    },
+    DataType.det: {
+        YoloBaseModels.xlarge: "yolov8x.pt",
+        YoloBaseModels.large: "yolov8l.pt",
+        YoloBaseModels.medium: "yolov8m.pt",
+        YoloBaseModels.small: "yolov8s.pt",
+        YoloBaseModels.nano: "yolov8n.pt",
+    },
 }
 
 DEFAULT_DATA_PREFIX = "limetree"

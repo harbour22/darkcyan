@@ -8,6 +8,7 @@ from blessed import Terminal
 from PIL import Image, ImageOps
 from rich.progress import Progress
 
+from .common_data_utils import create_training_zipfile
 from .config import Config
 from .constants import DEFAULT_CLS_SRC_NAME, DataType
 from .darkcyan_training_utils import (
@@ -135,7 +136,7 @@ def create_yolo_classification_dataset(
             train_image_dir = train_dir_img / img_class_dir.name
 
             num_images = len(image_list)
-            num_test_images = math.ceil(Config.get_value("test_ratio") * num_images)
+            num_test_images = math.ceil(Config.get_value("cls_test_ratio") * num_images)
 
             if num_test_images <= 2:
                 print(f"Insufficient test images for {img_class_dir.name}, skipping")
@@ -171,34 +172,6 @@ def create_yolo_classification_dataset(
             progress.update(train_task, visible=False)
 
     return training_version
-
-
-def create_classification_zipfile(version):
-    """Create a zip file for the classification dataset, expect version to have lb suffix for letterbox"""
-    init_directories()
-    temp_dir = Path(Config.get_value("temp_dir"))
-
-    input_directory = temp_dir / get_training_data_src_directory(version, DataType.cls)
-    if not input_directory.exists():
-        print(term.red(f"No data found for {version}, expected it {input_directory}"))
-        return
-    final_zip_filename = temp_dir / get_training_zip_name(version, DataType.cls, True)
-    if final_zip_filename.exists():
-        print(
-            term.red(f"Zip file already exists for {version} in {final_zip_filename}")
-        )
-        return final_zip_filename
-
-    with Progress(transient=False) as progress:
-        task1 = progress.add_task(
-            f"[blue]Creating zip file for {version} from {input_directory}", total=None
-        )
-        zip_filename = temp_dir / get_training_zip_name(version, DataType.cls)
-        zipfile = shutil.make_archive(
-            zip_filename, "zip", root_dir=input_directory, base_dir="."
-        )
-        progress.update(task1, completed=1)
-        return zipfile
 
 
 def main():

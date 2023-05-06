@@ -5,14 +5,12 @@ from pathlib import Path
 
 from blessed import Terminal
 from rich.progress import Progress
-from rich.traceback import install
-
-install(show_locals=True)
 
 from darkcyan.classify_data_utilities import (
-    create_classification_zipfile,
+    create_training_zipfile,
     create_yolo_classification_dataset,
 )
+from darkcyan.common_data_utils import create_training_zipfile
 from darkcyan.config import Config
 from darkcyan.constants import (
     DEFAULT_CLASSES_TXT,
@@ -24,6 +22,7 @@ from darkcyan.constants import (
     YoloBaseModels,
 )
 from darkcyan.darkcyan_training_utils import create_config_file
+from darkcyan.detection_data_utilities import create_yolo_detection_dataset
 from darkcyan.google_drive_utils import (
     delete_file,
     get_directory_id_from_path,
@@ -319,12 +318,11 @@ def remove_working_copy_of_data():
 
 def prepare_data_for_training():
     datatype = ask_for_dataset_type()
-    if datatype == DataType.det:
-        # unsupported
-        print(term.red(f"{DataType.det.name} unsupported for now, any key to continue"))
-        return
-
     src_version = training_version = ask_for_data_version(datatype, DataTag.scratch)
+
+    if datatype == DataType.det:
+        create_yolo_detection_dataset(src_version, training_version, 980)
+        create_training_zipfile(training_version, DataType.det)
 
     if datatype == DataType.cls:
         print(term.white(f"Create/use letterbox version? (y/n)"))
@@ -337,7 +335,7 @@ def prepare_data_for_training():
                 training_version = f"{src_version}lb"
 
         create_yolo_classification_dataset(src_version, training_version, use_letterbox)
-        create_classification_zipfile(training_version)
+        create_training_zipfile(training_version, DataType.cls)
 
 
 def remove_and_recreate_temp_directory():

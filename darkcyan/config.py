@@ -18,7 +18,8 @@ DEFAULT_CONFIG = {
     ).as_posix(),
     "data_prefix": "limetree",
     "labelImg_cmd": ["labelImg"],
-    "test_ratio": 0.2,
+    "cls_test_ratio": 0.2,
+    "det_test_ratio": 0.2,
     "training_epochs": 300,
 }
 
