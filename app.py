@@ -10,7 +10,7 @@ from darkcyan.classify_data_utilities import (
     create_training_zipfile,
     create_yolo_classification_dataset,
 )
-from darkcyan.common_data_utils import create_training_zipfile
+from darkcyan.darkcyan_training_utils import create_training_zipfile
 from darkcyan.config import Config
 from darkcyan.constants import (
     DEFAULT_CLASSES_TXT,

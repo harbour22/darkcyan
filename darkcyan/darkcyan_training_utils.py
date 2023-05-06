@@ -15,10 +15,7 @@ from .constants import (
     DataType,
     YoloBaseModels,
 )
-from .darkcyan_training_utils import (
-    get_training_data_src_directory,
-    get_training_zip_name,
-)
+
 from .local_data_utils import init_directories
 
 term = Terminal()
