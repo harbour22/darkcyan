@@ -24,7 +24,7 @@ def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano
     config["epochs"] = Config.get_value("training_epochs")
     config["imgsz"] = 224 if type == DataType.cls else 640
     config["batchsize"] = YOLOBATCHSIZEMAP[type][basemodel]
-    config["creation_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    config["config_creation_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     config["created_by"] = getpass.getuser()
     print(config)
 

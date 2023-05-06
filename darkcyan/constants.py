@@ -53,3 +53,4 @@ DEFAULT_GOOGLEDRIVE_YOLO_ENGINE_DIR = "yolo/engines"
 DEFAULT_GOOGLEDRIVE_SCOPE = ["https://www.googleapis.com/auth/drive"]
 
 DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_PREFIX}_yolo_training_config.json"
+DEFAULT_DET_TRAINING_YAML = "darkcyan.yaml"

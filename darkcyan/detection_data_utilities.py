@@ -11,7 +11,7 @@ from rich.progress import Progress
 
 from .common_data_utils import create_training_zipfile
 from .config import Config
-from .constants import DEFAULT_DET_SRC_NAME, DataType
+from .constants import DEFAULT_DET_SRC_NAME, DEFAULT_DET_TRAINING_YAML, DataType
 from .darkcyan_training_utils import (
     get_training_data_src_directory,
     get_training_zip_name,
@@ -100,7 +100,7 @@ def create_config(classes, outputdir):
         "names": classes_list,
     }
 
-    with open(f"{outputdir}/darkcyan.yaml", "w") as f:
+    with open(outputdir / DEFAULT_DET_TRAINING_YAML, "w") as f:
         documents = yaml.dump(yolo_config, f, default_flow_style=None)
 
 
