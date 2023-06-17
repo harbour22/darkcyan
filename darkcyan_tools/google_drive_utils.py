@@ -8,7 +8,7 @@ from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
 from rich.progress import Progress
 
-from .constants import (
+from darkcyan.constants import (
     DEFAULT_CONFIG_DIR,
     DEFAULT_GOOGLEDRIVE_SCOPE,
     DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR,

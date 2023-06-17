@@ -8,10 +8,9 @@ from blessed import Terminal
 from PIL import Image, ImageOps
 from rich.progress import Progress
 
-from .config import Config
-from .constants import DEFAULT_CLS_SRC_NAME, DataType
-from .darkcyan_training_utils import (
-    create_training_zipfile,
+from darkcyan.config import Config
+from darkcyan.constants import DEFAULT_CLS_SRC_NAME, DataType
+from .training_utils import (
     get_training_data_src_directory,
 )
 from .local_data_utils import get_local_scratch_directory_for_version, init_directories

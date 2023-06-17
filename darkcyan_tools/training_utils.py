@@ -8,8 +8,8 @@ from blessed import Terminal
 from rich import print
 from rich.progress import Progress
 
-from .config import Config
-from .constants import (
+from darkcyan.config import Config
+from darkcyan.constants import (
     DEFAULT_YOLO_TRAINING_CONFIG,
     YOLOBATCHSIZEMAP,
     DataType,

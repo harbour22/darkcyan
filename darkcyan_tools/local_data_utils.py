@@ -7,8 +7,8 @@ from rich import print
 from rich.progress import Progress
 from rich.tree import Tree
 
-from .config import Config
-from .constants import DataTag, DataType
+from darkcyan.config import Config
+from darkcyan.constants import DataTag, DataType
 
 term = Terminal()
 local_data_repository = Path(Config.get_value("local_data_repository"))
@@ -138,11 +138,11 @@ def display_available_data():
     for tag in DataTag:
         if tag == DataTag.main:
             type_root = tree_root.add(
-                term.darkcyan(f"Master Data ") + term.cyan(f"({local_data_repository})")
+                term.darkcyan(f"Local Master Data ") + term.cyan(f"({local_data_repository})")
             )
         elif tag == DataTag.scratch:
             type_root = tree_root.add(
-                term.darkcyan(f"Draft Data ") + term.cyan(f"({scratch_dir})")
+                term.darkcyan(f"Local Draft Data ") + term.cyan(f"({scratch_dir})")
             )
         else:
             type_root = tree_root.add(

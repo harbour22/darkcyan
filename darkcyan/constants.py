@@ -54,3 +54,8 @@ DEFAULT_GOOGLEDRIVE_SCOPE = ["https://www.googleapis.com/auth/drive"]
 
 DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_PREFIX}_yolo_training_config.json"
 DEFAULT_DET_TRAINING_YAML = "darkcyan.yaml"
+
+RUNTIME_CONFIG_FILE_PREFIX = 'magenta'
+DEFAULT_RUNTIME_CONFIG_FILE = f'{RUNTIME_CONFIG_FILE_PREFIX}-defaults.yaml'
+
+ENVIRONMENTS = ['prod','test']

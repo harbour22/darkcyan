@@ -6,11 +6,10 @@ from pathlib import Path
 from blessed import Terminal
 from rich.progress import Progress
 
-from darkcyan.classify_data_utilities import (
-    create_training_zipfile,
+from darkcyan_tools.classify_data_utilities import (
     create_yolo_classification_dataset,
 )
-from darkcyan.darkcyan_training_utils import create_training_zipfile
+from darkcyan_tools.training_utils import create_training_zipfile
 from darkcyan.config import Config
 from darkcyan.constants import (
     DEFAULT_CLASSES_TXT,
@@ -21,15 +20,15 @@ from darkcyan.constants import (
     DataType,
     YoloBaseModels,
 )
-from darkcyan.darkcyan_training_utils import create_config_file
-from darkcyan.detection_data_utilities import create_yolo_detection_dataset
-from darkcyan.google_drive_utils import (
+from darkcyan_tools.training_utils import create_config_file
+from darkcyan_tools.detection_data_utilities import create_yolo_detection_dataset
+from darkcyan_tools.google_drive_utils import (
     delete_file,
     get_directory_id_from_path,
     get_file_id,
     upload_file,
 )
-from darkcyan.local_data_utils import (
+from darkcyan_tools.local_data_utils import (
     clear_temp_directory,
     create_main_from_scratch,
     display_available_data,
@@ -425,7 +424,7 @@ command_options = [
     ),
     ("", "", None),
     ("", "=== Cloud Upload and Training ===", None),
-    ("7", "Upload data to google drive", upload_to_google_drive),
+    ("7", "Upload data to google drive (on auth err rm token.json)", upload_to_google_drive),
     (
         "8",
         "Create colab training command and upload to google drive",

@@ -20,7 +20,7 @@ DEFAULT_CONFIG = {
     "labelImg_cmd": "labelImg",
     "cls_test_ratio": 0.2,
     "det_test_ratio": 0.2,
-    "training_epochs": 300,
+    "training_epochs": 300
 }
 
 
