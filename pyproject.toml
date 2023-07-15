@@ -5,7 +5,7 @@ description = "Darkcyan project, main runtime and associated tools"
 authors = ["Chris <developer@harbour22.uk>"]
 license = "BSD 3-Clause License"
 readme = "README.md"
-packages = [{include = "darkcyan_tools"}]
+packages = [{include = "darkcyan_tools"}, {include = "darkcyan"}]
 
 
 
