@@ -6,6 +6,9 @@ from pathlib import Path
 from blessed import Terminal
 from rich.progress import Progress
 
+import functools
+echo = functools.partial(print, end='', flush=True)
+
 from darkcyan_tools.classify_data_utilities import (
     create_yolo_classification_dataset,
 )
@@ -106,6 +109,77 @@ def upload_to_google_drive():
 
     upload_file(file_to_upload, parent_dir, mimetype="application/zip")
 
+def get_integer_input():
+    with term.cbreak():
+        val = ''
+        
+        while True:
+            inp = term.inkey()
+            if(inp.code == term.KEY_ENTER):
+                if(len(val) == 0):
+                    print(term.red(f"Please enter an integer"))
+                    continue
+                else:
+                    break
+            if(inp.code == term.KEY_BACKSPACE):
+                val = val[:-1]
+                echo(u'\b \b')
+                continue
+            if(inp.isdigit()):
+                val += inp
+                echo(term.darkcyan(inp))
+    return int(val)
+
+def trim_detection_dataset():
+    data_version = ask_for_data_version(DataType.det, DataTag.scratch)
+
+    data_directory = get_local_scratch_directory_for_version(data_version, DataType.det)
+
+    parent_directory = data_directory / DEFAULT_DET_SRC_NAME
+
+    image_dirs = []
+    for file in Path(parent_directory).iterdir():
+        if file.is_dir():
+            image_dirs.append(file)
+
+    if len(image_dirs) == 0:
+        print(term.red(f"No images found"))
+        return
+
+    print(term.white(f"Choose the image directory: "))
+    for choice, image_dir in enumerate(image_dirs, start=1):
+        print(term.white(f"{choice}: {image_dir.name}"))
+    inp = ""
+    with term.cbreak():
+        inp = term.inkey()
+        print(term.darkcyan(f"{inp}"))
+
+    image_dir = image_dirs[int(inp) - 1]
+    
+    ext = '.jpg'
+    n_files = len([p for p in image_dir.iterdir() if p.suffix==f'{ext}'])
+    print(term.white(f"Found {n_files} {ext} files"))
+
+    print(term.white(f"How many images to keep?"))
+
+    image_cnt = get_integer_input()
+
+    counter = keep = 0
+    keep_every_nth = int(n_files / image_cnt)
+    print(keep_every_nth)
+
+    for image_file in [p for p in image_dir.iterdir() if p.suffix==f'{ext}']:
+        counter += 1
+        yolo_file = image_file.with_suffix(".txt")
+
+        if(counter % keep_every_nth == 0):            
+            keep += 1
+        else:            
+            image_file.unlink()
+            yolo_file.unlink()
+            continue
+
+    print(term.white(f"Kept {keep} images"))
 
 def run_labelimg():
     data_version = ask_for_data_version(DataType.det, DataTag.scratch)
@@ -408,31 +482,32 @@ command_options = [
     ("", "=== Data Generation and Management ===", None),
     ("1", "Display available data", display_available_data),
     ("2", "Create local working copy of data", author_new_dataset),
-    ("3", "Launch labelImg for detection data", run_labelimg),
+    ("3", "Trim detection dataset", trim_detection_dataset),
+    ("4", "Launch labelImg for detection data", run_labelimg),
     ("", "", None),
     ("", "=== Training Data Manipulation ===", None),
     (
-        "4",
+        "5",
         "Build new master dataset from local working copy",
         create_main_dataset_from_scratch,
     ),
-    ("5", "Remove local working copy", remove_working_copy_of_data),
+    ("6", "Remove local working copy", remove_working_copy_of_data),
     (
-        "6",
+        "7",
         "Prepare data for training from local working copy",
         prepare_data_for_training,
     ),
     ("", "", None),
     ("", "=== Cloud Upload and Training ===", None),
-    ("7", "Upload data to google drive (on auth err rm token.json)", upload_to_google_drive),
+    ("8", "Upload data to google drive (on auth err rm token.json)", upload_to_google_drive),
     (
-        "8",
+        "9",
         "Create colab training command and upload to google drive",
         create_colab_training_config,
     ),
     ("", "", None),
     ("", "=== Utilities ===", None),
-    ("9", "Clear temp directory", remove_and_recreate_temp_directory),
+    ("c", "Clear temp directory", remove_and_recreate_temp_directory),
     ("m", "Show full menu", print_command_menu),
     ("q", "Quit", quit),
 ]
