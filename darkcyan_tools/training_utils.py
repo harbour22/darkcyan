@@ -118,7 +118,10 @@ def train():
 
 
     start_time = time.time()
-    model.train(epochs=epochs, resume=resume, project=project_path.as_posix(), batch=batch, data=data.as_posix(), imgsz=imgsz, exist_ok = True, device='mps' if mps_available else 'gpu')
+    if(mps_available):
+        model.train(epochs=epochs, resume=resume, project=project_path.as_posix(), batch=batch, data=data.as_posix(), imgsz=imgsz, exist_ok = True, device='mps')
+    else:
+        model.train(epochs=epochs, resume=resume, project=project_path.as_posix(), batch=batch, data=data.as_posix(), imgsz=imgsz, exist_ok = True)
     end_time = time.time()     
 
 
