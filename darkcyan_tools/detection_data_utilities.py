@@ -92,9 +92,8 @@ def create_config(classes, outputdir):
         classes_list = list(filter(None, classes_txt.split("\n")))
 
     yolo_config = {
-        "path": "path to directory on colab machine",
-        "train": f"/content/det_training_data/images/train",
-        "val": f"/content/det_training_data/images/test",
+        "train": f"images/train",
+        "val": f"images/test",
         "nc": len(classes_list),
         "names": classes_list,
     }

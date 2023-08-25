@@ -17,8 +17,8 @@ from darkcyan.config import Config
 from darkcyan.constants import (
     DEFAULT_CLASSES_TXT,
     DEFAULT_DET_SRC_NAME,
-    DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR,
-    DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR,
+    DEFAULT_TRAINING)YOLO_CONFIG_DIR,
+    DEFAULT_YOLO_DATA_DIR,
     DataTag,
     DataType,
     YoloBaseModels,
@@ -87,7 +87,7 @@ def upload_to_google_drive():
         print(term.red(f"{file_to_upload} not found to upload"))
         return
 
-    parent_dir = get_directory_id_from_path(DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR)
+    parent_dir = get_directory_id_from_path(DEFAULT_YOLO_DATA_DIR)
 
     ## Delete existing files from google drive
     existing_files = get_file_id(file_to_upload.name, parent_dir)
@@ -439,7 +439,7 @@ def create_colab_training_config():
 
         config_file = create_config_file(version, datatype, basemodel)
         google_parent_dir = get_directory_id_from_path(
-            DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR
+            DEFAULT_TRAINING)YOLO_CONFIG_DIR
         )
         ## Delete existing files from google drive
         existing_files = get_file_id(config_file.name, google_parent_dir)

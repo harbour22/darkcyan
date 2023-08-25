@@ -45,11 +45,14 @@ DEFAULT_DATA_PREFIX = "limetree"
 DEFAULT_DET_SRC_NAME = "images_det_src"
 DEFAULT_CLS_SRC_NAME = "images_cls_src"
 DEFAULT_CLASSES_TXT = "classes.txt"
-GOOGLEDRIVE_DATA_ROOT = "/content/drive/MyDrive"
-DEFAULT_GOOGLEDRIVE_YOLO_DATA_DIR = "yolo/training_data"
-DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR = "yolo/runtime_config"
-DEFAULT_GOOGLEDRIVE_YOLO_TRAINING_OUTPUT_DIR = "yolo/training_output"
-DEFAULT_GOOGLEDRIVE_YOLO_ENGINE_DIR = "yolo/engines"
+GOOGLEDRIVE_CONTENT_ROOT = "/content"
+GOOGLEDRIVE_SRC_TRAINING_DATA_ROOT = f"{GOOGLEDRIVE_CONTENT_ROOT}/drive/MyDrive"
+DEFAULT_TRAINING_YOLO_DATA_DIR = "yolo/training_data"
+DEFAULT_TRAINING_YOLO_CONFIG_DIR = "yolo/runtime_config"
+DEFAULT_TRAINING_YOLO_OUTPUT_DIR = "yolo/training_output"
+DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR = "yolo/engines"
+
+
 DEFAULT_GOOGLEDRIVE_SCOPE = ["https://www.googleapis.com/auth/drive"]
 
 DEFAULT_YOLO_TRAINING_CONFIG = f"{DEFAULT_DATA_PREFIX}_yolo_training_config.json"

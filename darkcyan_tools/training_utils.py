@@ -1,3 +1,5 @@
+import os, sys, time
+
 import getpass
 import json
 import shutil
@@ -18,8 +20,129 @@ from darkcyan.constants import (
 
 from .local_data_utils import init_directories
 
+import torch
+
+
+from darkcyan.constants import GOOGLEDRIVE_SRC_TRAINING_DATA_ROOT, \
+                               DEFAULT_TRAINING_YOLO_DATA_DIR, \
+                               DEFAULT_TRAINING_YOLO_CONFIG_DIR, \
+                               DEFAULT_TRAINING_YOLO_OUTPUT_DIR, \
+                               DEFAULT_YOLO_TRAINING_CONFIG, \
+                               DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR, \
+                               YOLOMODELMAP, \
+                               YoloBaseModels, \
+                               DataType, DEFAULT_DET_TRAINING_YAML
+
+from ultralytics import YOLO
+
+def get_platform():
+    platforms = {
+        'linux1' : 'Linux',
+        'linux2' : 'Linux',
+        'darwin' : 'Darwin',
+        'win32' : 'Windows'
+    }
+    if sys.platform not in platforms:
+        return sys.platform
+    
+    return platforms[sys.platform]
+
+
+platform = get_platform()
+
 term = Terminal()
 
+def train():
+    """Train the model"""
+    print("Training the model")
+    if os.getenv("COLAB_RELEASE_TAG"):
+        print(f"Running in Colab on {platform}")
+        in_colab = True
+    else:
+        in_colab = False
+        print(f"Running on {platform}")
+    training_data_root = Path(Config.get_value("training_data_root"))
+    temp_dir_root = Path(Config.get_value("temp_dir"))
+
+        ## Load config
+    config_file = training_data_root / \
+                    DEFAULT_TRAINING_YOLO_CONFIG_DIR / \
+                    DEFAULT_YOLO_TRAINING_CONFIG
+
+    with open(config_file, "r", encoding="utf-8") as f:
+        config = json.load(f)
+    print(json.dumps(config, indent=4))
+
+    data_type = DataType[config['type']]
+    model_size = YoloBaseModels[config['basemodel']]
+    version = config['version']
+    batch = config['batchsize']
+    epochs = config['epochs']
+    imgsz = config['imgsz']
+
+    project_path = Path(training_data_root) / \
+                DEFAULT_TRAINING_YOLO_OUTPUT_DIR / \
+                config['type'] / f"darkcyan_{config['version']}" / \
+                model_size.name
+
+    data = data_path = temp_dir_root / f"{data_type.name}_{version}_training_data"
+    
+
+    if data_type == DataType.det:
+        data = data / DEFAULT_DET_TRAINING_YAML
+
+    if(data_path.exists()):
+        print(f"Training data found at {data_path}")
+    else:
+        zip_filename = Path(training_data_root) / DEFAULT_TRAINING_YOLO_DATA_DIR / config['training_data']
+        print(f"Unzipping training data {zip_filename} to {data_path}")
+        shutil.unpack_archive(zip_filename,data_path)
+
+    last_run = project_path / 'train' / 'weights' / 'last.pt'
+    if last_run.exists():
+        base_model = last_run
+        resume=True
+    else:
+        base_model = YOLOMODELMAP[data_type][model_size]
+        resume=False
+
+    print(base_model, last_run, resume)
+
+    model = YOLO(base_model) # pass any model type
+    mps_available = torch.backends.mps.is_available()
+
+    if not mps_available:
+        if not torch.backends.mps.is_built():
+            print("MPS not available because the current PyTorch install was not "
+              "built with MPS enabled.")
+        else:
+            print("MPS not available because the current MacOS version is not 12.3+ "
+              "and/or you do not have an MPS-enabled device on this machine.")
+
+
+    start_time = time.time()
+    model.train(epochs=epochs, resume=resume, project=project_path.as_posix(), batch=batch, data=data.as_posix(), imgsz=imgsz, exist_ok = True, device='mps' if mps_available else [0])
+    end_time = time.time()     
+
+
+    engine_file_name = f"yolov8_{config['version']}_{config['basemodel']}-{config['type']}.pt"
+    config_file_name = f"yolov8_{config['version']}_{config['basemodel']}-{config['type']}.json"
+    training_output = project_path / 'train' / 'weights' / 'best.pt'
+    engine_dir = Path(training_data_root) / DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR
+    engine_output = engine_dir / engine_file_name
+    config_output = Path(training_data_root) / DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR / config_file_name
+
+    if(not Path(engine_dir).exists()):
+        engine_dir.mkdir(parents=True)
+
+    shutil.copy(training_output, engine_output)
+
+    config['output_engine'] = engine_file_name
+    config['colab_version'] = os.environ['COLAB_RELEASE_TAG']
+    config['elapsed_training_time_mins'] = f'{(end_time - start_time)/60:.2f}'
+    config["training_end_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    save_config(config, config_output)
 
 def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano):
     print(f"Creating config file for {type.name} {version} {basemodel.name}")
@@ -89,7 +212,8 @@ def create_training_zipfile(version, type):
 
 
 def main():
-    create_config_file("4.1lb", DataType.cls, YoloBaseModels.nano)
+    train()
+    #create_config_file("4.1lb", DataType.cls, YoloBaseModels.nano)
 
 
 if __name__ == "__main__":

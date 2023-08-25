@@ -6,7 +6,7 @@ from pathlib import Path
 
 from rich import print
 
-from .constants import DEFAULT_CONFIG_DIR, DataTag
+from .constants import DEFAULT_CONFIG_DIR, DataTag, GOOGLEDRIVE_SRC_TRAINING_DATA_ROOT
 
 DEFAULT_CONFIG = {
     f"scratch_dir": (
@@ -20,7 +20,8 @@ DEFAULT_CONFIG = {
     "labelImg_cmd": "labelImg",
     "cls_test_ratio": 0.2,
     "det_test_ratio": 0.2,
-    "training_epochs": 300
+    "training_epochs": 350,
+    "training_data_root": GOOGLEDRIVE_SRC_TRAINING_DATA_ROOT if os.getenv("COLAB_RELEASE_TAG") else "."
 }
 
 

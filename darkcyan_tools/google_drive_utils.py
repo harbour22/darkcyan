@@ -11,7 +11,7 @@ from rich.progress import Progress
 from darkcyan.constants import (
     DEFAULT_CONFIG_DIR,
     DEFAULT_GOOGLEDRIVE_SCOPE,
-    DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR,
+    DEFAULT_TRAINING)YOLO_CONFIG_DIR,
 )
 
 
@@ -140,7 +140,7 @@ def upload_file(upload_file_path, parent_id, mimetype="application/zip"):
 
 if __name__ == "__main__":
     parent_directory_id = get_directory_id_from_path(
-        f"{DEFAULT_GOOGLEDRIVE_YOLO_CONFIG_DIR}"
+        f"{DEFAULT_TRAINING)YOLO_CONFIG_DIR}"
     )
     files = get_file_id("limetree_yolo_training_config.json", parent_directory_id)
     print(files)
