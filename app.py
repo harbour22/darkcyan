@@ -17,7 +17,7 @@ from darkcyan.config import Config
 from darkcyan.constants import (
     DEFAULT_CLASSES_TXT,
     DEFAULT_DET_SRC_NAME,
-    DEFAULT_TRAINING)YOLO_CONFIG_DIR,
+    DEFAULT_TRAINING_YOLO_CONFIG_DIR,
     DEFAULT_YOLO_DATA_DIR,
     DataTag,
     DataType,
@@ -439,7 +439,7 @@ def create_colab_training_config():
 
         config_file = create_config_file(version, datatype, basemodel)
         google_parent_dir = get_directory_id_from_path(
-            DEFAULT_TRAINING)YOLO_CONFIG_DIR
+            DEFAULT_TRAINING_YOLO_CONFIG_DIR
         )
         ## Delete existing files from google drive
         existing_files = get_file_id(config_file.name, google_parent_dir)
