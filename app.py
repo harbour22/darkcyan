@@ -18,7 +18,7 @@ from darkcyan.constants import (
     DEFAULT_CLASSES_TXT,
     DEFAULT_DET_SRC_NAME,
     DEFAULT_TRAINING_YOLO_CONFIG_DIR,
-    DEFAULT_YOLO_DATA_DIR,
+    DEFAULT_TRAINING_YOLO_DATA_DIR,
     DataTag,
     DataType,
     YoloBaseModels,
