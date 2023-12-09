@@ -1,16 +1,14 @@
 [tool.poetry]
 name = "darkcyan"
-version = "0.1.0"
+version = "0.2.0"
 description = "Darkcyan project, main runtime and associated tools"
 authors = ["Chris <developer@harbour22.uk>"]
 license = "BSD 3-Clause License"
 readme = "README.md"
 packages = [{include = "darkcyan_tools"}, {include = "darkcyan"}]
 
-
-
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.11"
 enlighten = "^1.11.2"
 blessed = "^1.20.0"
 rich = "^13.3.5"
@@ -20,7 +18,7 @@ google-auth-httplib2 = "^0.1.0"
 google-auth-oauthlib = "^1.0.0"
 opencv-python = "^4.7.0.72"
 ultralytics = "^8.0.223"
-torch = "^2.0.1"
+torch = ">=2.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
