@@ -86,8 +86,7 @@ def upload_to_google_drive():
     if not file_to_upload.exists():
         print(term.red(f"{file_to_upload} not found to upload"))
         return
-
-    parent_dir = get_directory_id_from_path(DEFAULT_YOLO_DATA_DIR)
+    parent_dir = get_directory_id_from_path(DEFAULT_TRAINING_YOLO_DATA_DIR)
 
     ## Delete existing files from google drive
     existing_files = get_file_id(file_to_upload.name, parent_dir)
