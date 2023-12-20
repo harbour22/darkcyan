@@ -5,10 +5,10 @@ description = "Darkcyan project, main runtime and associated tools"
 authors = ["Chris <developer@harbour22.uk>"]
 license = "BSD 3-Clause License"
 readme = "README.md"
-packages = [{include = "darkcyan_tools"}, {include = "darkcyan"}]
+packages = [{include = "darkcyan_tools"}, {include = "darkcyan"}, {include = "darkcyan_utils"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.10"
 enlighten = "^1.11.2"
 blessed = "^1.20.0"
 rich = "^13.3.5"
