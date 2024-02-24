@@ -17,7 +17,6 @@ def show_image_with_coords(image_file, camera_name):
 
     y_size, x_size, depth = image.shape
 
-
     with open((Path(DEFAULT_CONFIG_DIR) / DEFAULT_RUNTIME_CONFIG_FILE ), "r", encoding='utf8') as f:
         app_defaults = yaml.full_load(f.read())
 
@@ -91,7 +90,7 @@ def show_image_with_coords(image_file, camera_name):
 
 
 def main():
-    show_image_with_coords( Path(Config.get_value('local_data_repository')) / 'test_data' / 'Reolink4k-Front.jpg', 'reolink4k-front')
+    show_image_with_coords( Path(Config.get_value('local_data_repository')) / 'test_data' / 'Reolink4k-Courtyard.jpg', 'reolink4k-courtyard')
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ from __future__ import print_function
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
+from google.auth.exceptions import RefreshError
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -30,12 +31,18 @@ def get_credentials():
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_file, DEFAULT_GOOGLEDRIVE_SCOPE
-            )
-            creds = flow.run_local_server(port=0)
+            try: 
+                creds.refresh(Request())
+                return creds
+            except RefreshError:
+                print('Unable to use local cached token, removing.  You will need to re-authenticate.')
+                token_file.unlink()
+
+        
+        flow = InstalledAppFlow.from_client_secrets_file(
+            credentials_file, DEFAULT_GOOGLEDRIVE_SCOPE
+        )
+        creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
         with open(token_file, "w") as token:
             token.write(creds.to_json())

@@ -162,3 +162,7 @@ cython_debug/
 python-env
 .DS_Store
 *.pt
+*.png
+*.whl
+logs/
+.env

@@ -69,6 +69,8 @@ def train():
                     DEFAULT_TRAINING_YOLO_CONFIG_DIR / \
                     DEFAULT_YOLO_TRAINING_CONFIG
 
+    print(f'Loading config from {config_file}')
+
     with open(config_file, "r", encoding="utf-8") as f:
         config = json.load(f)
     print(json.dumps(config, indent=4))
@@ -98,7 +100,7 @@ def train():
         print(f"Unzipping training data {zip_filename} to {data_path}")
         shutil.unpack_archive(zip_filename,data_path)
 
-    last_run = project_path / 'train' / 'weights' / 'last.pt'
+    last_run = project_path / 'train' / platform / 'weights' / 'last.pt'
     if last_run.exists():
         base_model = last_run
         resume=True

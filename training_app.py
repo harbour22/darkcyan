@@ -226,6 +226,7 @@ def run_labelimg():
         task1 = progress.add_task(
             f"[blue]Running imageLbl for version {data_version}", total=None
         )
+        print(labelImg_cmd, labelImg_args)
 
         pipe = subprocess.Popen(
             f"{labelImg_cmd} {labelImg_args}",

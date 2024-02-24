@@ -10,12 +10,13 @@ from .constants import DEFAULT_CONFIG_DIR, DataTag, GOOGLEDRIVE_SRC_TRAINING_DAT
 
 DEFAULT_CONFIG = {
     f"scratch_dir": (
-        Path.home() / "developer" / "darkcyan_data" / "scratch"
+        Path.home() / "developer"  / "darkcyan_data" / "training_data" / "scratch"
     ).as_posix(),
-    "temp_dir": (Path.home() / "developer" / "darkcyan_data" / "temp").as_posix(),
+    "temp_dir": (Path.home() / "developer" / "darkcyan_data" / "training_data" / "temp").as_posix(),
     "local_data_repository": (
-        Path.home() / "developer" / "darkcyan_data" / "main"
+        Path.home() / "developer" / "darkcyan_data" / "training_data" / "main"
     ).as_posix(),
+    "config_file": (Path.home() / "developer" / "darkcyan_data" / "runtime_config" / "config.yaml").as_posix(),
     "data_prefix": "limetree",
     "labelImg_cmd": "labelImg",
     "cls_test_ratio": 0.2,
