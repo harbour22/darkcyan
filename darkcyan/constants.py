@@ -25,20 +25,31 @@ YOLOBATCHSIZEMAP = {
 }
 
 YOLOMODELMAP = {
-    DataType.cls: {
-        YoloBaseModels.xlarge: "yolov8x-cls.pt",
-        YoloBaseModels.large: "yolov8l-cls.pt",
-        YoloBaseModels.medium: "yolov8m-cls.pt",
-        YoloBaseModels.small: "yolov8s-cls.pt",
-        YoloBaseModels.nano: "yolov8n-cls.pt",
+    "v8": {
+        DataType.cls: {
+            YoloBaseModels.xlarge: "yolov8x-cls.pt",
+            YoloBaseModels.large: "yolov8l-cls.pt",
+            YoloBaseModels.medium: "yolov8m-cls.pt",
+            YoloBaseModels.small: "yolov8s-cls.pt",
+            YoloBaseModels.nano: "yolov8n-cls.pt",
+        },
+        DataType.det: {
+            YoloBaseModels.xlarge: "yolov8x.pt",
+            YoloBaseModels.large: "yolov8l.pt",
+            YoloBaseModels.medium: "yolov8m.pt",
+            YoloBaseModels.small: "yolov8s.pt",
+            YoloBaseModels.nano: "yolov8n.pt",
+        },
     },
-    DataType.det: {
-        YoloBaseModels.xlarge: "yolov8x.pt",
-        YoloBaseModels.large: "yolov8l.pt",
-        YoloBaseModels.medium: "yolov8m.pt",
-        YoloBaseModels.small: "yolov8s.pt",
-        YoloBaseModels.nano: "yolov8n.pt",
-    },
+    "v9": {
+        DataType.det: {
+            YoloBaseModels.xlarge: "yolov9e.pt",
+            YoloBaseModels.large: "yolov9c.pt",
+            YoloBaseModels.medium: "yolov9m.pt",
+            YoloBaseModels.small: "yolov9s.pt",
+            YoloBaseModels.nano: "yolov9t.pt",
+        }
+    }
 }
 
 DEFAULT_DATA_PREFIX = "limetree"
@@ -61,4 +72,4 @@ DEFAULT_DET_TRAINING_YAML = "darkcyan.yaml"
 RUNTIME_CONFIG_FILE_PREFIX = 'magenta'
 DEFAULT_RUNTIME_CONFIG_FILE = f'{RUNTIME_CONFIG_FILE_PREFIX}-defaults.yaml'
 
-ENVIRONMENTS = ['prod','test']
+ENVIRONMENTS = ['prod', 'test']

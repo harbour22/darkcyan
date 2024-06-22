@@ -81,6 +81,7 @@ def train():
     batch = config['batchsize']
     epochs = config['epochs']
     imgsz = config['imgsz']
+    yolo_version = config.get('yolov', 'v8')
 
     project_path = Path(training_data_root) / \
                 DEFAULT_TRAINING_YOLO_OUTPUT_DIR / \
@@ -105,7 +106,7 @@ def train():
         base_model = last_run
         resume=True
     else:
-        base_model = YOLOMODELMAP[data_type][model_size]
+        base_model = YOLOMODELMAP[yolo_version][data_type][model_size]
         resume=False
 
     print(base_model, last_run, resume)
