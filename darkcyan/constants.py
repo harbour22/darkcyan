@@ -49,7 +49,16 @@ YOLOMODELMAP = {
             YoloBaseModels.small: "yolov9s.pt",
             YoloBaseModels.nano: "yolov9t.pt",
         }
-    }
+    },
+    "v10": {
+        DataType.det: {
+            YoloBaseModels.xlarge: "yolov10n.pt",
+            YoloBaseModels.large: "yolov10s.pt",
+            YoloBaseModels.medium: "yolov10m.pt",
+            YoloBaseModels.small: "yolov10l.pt",
+            YoloBaseModels.nano: "yolov10x.pt",
+        }
+    }    
 }
 
 DEFAULT_DATA_PREFIX = "limetree"
