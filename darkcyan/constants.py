@@ -52,11 +52,11 @@ YOLOMODELMAP = {
     },
     "v10": {
         DataType.det: {
-            YoloBaseModels.xlarge: "yolov10n.pt",
-            YoloBaseModels.large: "yolov10s.pt",
+            YoloBaseModels.xlarge: "yolov10x.pt",
+            YoloBaseModels.large: "yolov10l.pt",
             YoloBaseModels.medium: "yolov10m.pt",
-            YoloBaseModels.small: "yolov10l.pt",
-            YoloBaseModels.nano: "yolov10x.pt",
+            YoloBaseModels.small: "yolov10s.pt",
+            YoloBaseModels.nano: "yolov10n.pt",
         }
     }    
 }
