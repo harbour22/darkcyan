@@ -258,7 +258,7 @@ class DarkCyanObjectDetection(object):
                 self.status_shared_memory.buf[99] = len(status)
                 
                 if(len(final_result_categories)>0):
-                    #cv2.imwrite(f'output_{self.source_name}.png', original_frame)
+                    cv2.imwrite(f'output_{self.source_name}.png', original_frame)
 
                     output_frame = original_frame
                     locked = self.buffer_lock.acquire(block=False)

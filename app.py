@@ -11,7 +11,7 @@ from pathlib import Path
 import yaml
 from rich.progress import Progress, TextColumn
 
-import darkcyan.camera_process
+import darkcyan.camera_process_yolo
 import darkcyan_utils.SignalMonitor as SignalMonitor
 from darkcyan.config import Config
 
@@ -49,11 +49,11 @@ def run():
     video_sources = {}
     keep_running = Value("b", True)
 
-    for source in app_config["sources"]:
-        print(f"{source}: {app_config['sources'][source]['name']}")
+    for source in app_config["test_sources"]:
+        print(f"{source}: {app_config['test_sources'][source]['name']}")
         vsc = DarkCyanSourceConfig(
-            app_config["sources"][source]["name"],
-            app_config["sources"][source]["cv2_connection_string"],
+            app_config["test_sources"][source]["name"],
+            app_config["test_sources"][source]["cv2_connection_string"],
             keep_running,
         )
         video_sources[source] = {"vs": vsc}
@@ -79,7 +79,7 @@ def run():
         video_sources[source]["shm_status"] = status_shared_memory
 
         process = Process(
-            target=darkcyan.camera_process.run,
+            target=darkcyan.camera_process_yolo.run,
             args=[
                 process_config.source_name,
                 process_config.source_path,
