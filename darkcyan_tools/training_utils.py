@@ -25,6 +25,7 @@ from darkcyan.constants import DEFAULT_TRAINING_YOLO_DATA_DIR, \
                                DEFAULT_YOLO_TRAINING_CONFIG, \
                                DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR, \
                                YOLOMODELMAP, \
+                               YoloVersion, \
                                YOLOBATCHSIZEMAP, \
                                YoloBaseModels, \
                                DataType, \
@@ -77,7 +78,7 @@ def train():
     batch = config['batchsize']
     epochs = config['epochs']
     imgsz = config['imgsz']
-    yolo_version = config.get('yolov', 'v8')
+    yolo_version = YoloVersion[config.get('yolov', 'v8')]
 
     project_path = Path(training_data_root) / \
                 DEFAULT_TRAINING_YOLO_OUTPUT_DIR / \
@@ -143,13 +144,15 @@ def train():
 
     save_config(config, config_output)
 
-def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano):
+def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano, yoloVersion=YoloBaseModels.medium):
     print(f"Creating config file for {type.name} {version} {basemodel.name}")
     config = {}
     config["version"] = version
     config["type"] = type.name
+    config["yolov"] = yoloVersion
     config["training_data"] = get_training_zip_name(version, type, True)
     config["basemodel"] = basemodel.name
+
     config["epochs"] = Config.get_value("training_epochs")
     config["imgsz"] = 224 if type == DataType.cls else 640
     config["batchsize"] = YOLOBATCHSIZEMAP[type][basemodel]

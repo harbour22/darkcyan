@@ -77,7 +77,8 @@ def ask_for_yolo_version(dataType):
             print(term.red(f"Illogical choice {choice}"))
             return
     # never going to work...
-    yoloVersion = YOLOMODELMAP[dataType](int(choice))
+    print(list(YOLOMODELMAP[dataType]),YOLOMODELMAP[dataType], dataType, int(choice))
+    yoloVersion = list(YOLOMODELMAP[dataType])[int(choice)-1]
 
     return yoloVersion
 
@@ -461,7 +462,7 @@ def create_colab_training_config():
 
         basemodel = YoloBaseModels(int(choice))
 
-        config_file = create_config_file(version, datatype, basemodel)
+        config_file = create_config_file(version, datatype, basemodel, yoloVersion)
         google_parent_dir = get_directory_id_from_path(
             DEFAULT_TRAINING_YOLO_CONFIG_DIR
         )
