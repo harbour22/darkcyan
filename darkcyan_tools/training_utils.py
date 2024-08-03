@@ -98,7 +98,7 @@ def train():
         print(f"Unzipping training data {zip_filename} to {data_path}")
         shutil.unpack_archive(zip_filename,data_path)
 
-    last_run = project_path / 'train' / platform / 'weights' / 'last.pt'
+    last_run = project_path / 'train' / 'weights' / 'last.pt'
     if last_run.exists():
         base_model = last_run
         resume=True
