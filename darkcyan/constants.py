@@ -5,7 +5,9 @@ DEFAULT_CONFIG_DIR = Path.home() / ".darkcyan"
 
 DataType = Enum("DataType", ["det", "cls"])
 DataTag = Enum("DataTag", ["main", "scratch", "temp"])
-YoloBaseModels = Enum("YoloBaseModels", ["xlarge", "large", "medium", "small", "nano"])
+YoloVersion = Enum("YoloVersion", ["v8", "v9", "v10"])
+YoloBaseModels = Enum("YoloBaseModels", ["xlarge", "large", "medium",
+                                         "small", "nano"])
 
 YOLOBATCHSIZEMAP = {
     DataType.cls: {
@@ -24,42 +26,41 @@ YOLOBATCHSIZEMAP = {
     },
 }
 
-YOLOMODELMAP = {
-    "v8": {
+YOLOMODELMAP = { 
         DataType.cls: {
-            YoloBaseModels.xlarge: "yolov8x-cls.pt",
-            YoloBaseModels.large: "yolov8l-cls.pt",
-            YoloBaseModels.medium: "yolov8m-cls.pt",
-            YoloBaseModels.small: "yolov8s-cls.pt",
-            YoloBaseModels.nano: "yolov8n-cls.pt",
+            YoloVersion.v8: {
+                YoloBaseModels.xlarge: "yolov8x-cls.pt",
+                YoloBaseModels.large: "yolov8l-cls.pt",
+                YoloBaseModels.medium: "yolov8m-cls.pt",
+                YoloBaseModels.small: "yolov8s-cls.pt",
+                YoloBaseModels.nano: "yolov8n-cls.pt",
+            }
         },
         DataType.det: {
-            YoloBaseModels.xlarge: "yolov8x.pt",
-            YoloBaseModels.large: "yolov8l.pt",
-            YoloBaseModels.medium: "yolov8m.pt",
-            YoloBaseModels.small: "yolov8s.pt",
-            YoloBaseModels.nano: "yolov8n.pt",
+            YoloVersion.v8: {
+                YoloBaseModels.xlarge: "yolov8x.pt",
+                YoloBaseModels.large: "yolov8l.pt",
+                YoloBaseModels.medium: "yolov8m.pt",
+                YoloBaseModels.small: "yolov8s.pt",
+                YoloBaseModels.nano: "yolov8n.pt",
+            },
+            YoloVersion.v9: {
+                YoloBaseModels.xlarge: "yolov9e.pt",
+                YoloBaseModels.large: "yolov9c.pt",
+                YoloBaseModels.medium: "yolov9m.pt",
+                YoloBaseModels.small: "yolov9s.pt",
+                YoloBaseModels.nano: "yolov9t.pt",
+            },
+            YoloVersion.v10: {
+                YoloBaseModels.xlarge: "yolov10x.pt",
+                YoloBaseModels.large: "yolov10l.pt",
+                YoloBaseModels.medium: "yolov10m.pt",
+                YoloBaseModels.small: "yolov10s.pt",
+                YoloBaseModels.nano: "yolov10n.pt",
+            },
         },
-    },
-    "v9": {
-        DataType.det: {
-            YoloBaseModels.xlarge: "yolov9e.pt",
-            YoloBaseModels.large: "yolov9c.pt",
-            YoloBaseModels.medium: "yolov9m.pt",
-            YoloBaseModels.small: "yolov9s.pt",
-            YoloBaseModels.nano: "yolov9t.pt",
-        }
-    },
-    "v10": {
-        DataType.det: {
-            YoloBaseModels.xlarge: "yolov10x.pt",
-            YoloBaseModels.large: "yolov10l.pt",
-            YoloBaseModels.medium: "yolov10m.pt",
-            YoloBaseModels.small: "yolov10s.pt",
-            YoloBaseModels.nano: "yolov10n.pt",
-        }
-    }    
-}
+    }
+
 
 DEFAULT_DATA_PREFIX = "limetree"
 DEFAULT_DET_SRC_NAME = "images_det_src"

@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "darkcyan_tools"}, {include = "darkcyan_utils"}, {include = "darkcyan"}]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.8"
 enlighten = "^1.11.2"
 blessed = "^1.20.0"
 rich = "^13.3.5"
@@ -16,12 +16,12 @@ google-api-python-client = "^2.86.0"
 google-auth-httplib2 = "^0.1.0"
 google-auth-oauthlib = "^1.0.0"
 opencv-python = "^4.7.0.72"
-ultralytics = "^8.0.223"
-torch = "2.1.0"
+ultralytics = "^8.2"
+#torch = "2.1.0"
 imutils = "^0.5.4"
 lapx = "^0.5.5"
 ffmpeg-python = "^0.2.0"
-coremltools = "^7.1"
+#coremltools = "^7.1"
 onnx = "^1.15.0"
 
 

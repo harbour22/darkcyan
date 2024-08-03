@@ -1,4 +1,6 @@
-import os, sys, time
+import os
+import sys
+import time
 
 import getpass
 import json
@@ -6,41 +8,35 @@ import shutil
 from datetime import datetime
 from pathlib import Path
 
+import torch
+
 from blessed import Terminal
 from rich import print
 from rich.progress import Progress
 
-from darkcyan.config import Config
-from darkcyan.constants import (
-    DEFAULT_YOLO_TRAINING_CONFIG,
-    YOLOBATCHSIZEMAP,
-    DataType,
-    YoloBaseModels,
-)
+from ultralytics import YOLO
 
+from darkcyan.config import Config
 from .local_data_utils import init_directories
 
-import torch
-
-
-from darkcyan.constants import GOOGLEDRIVE_SRC_TRAINING_DATA_ROOT, \
-                               DEFAULT_TRAINING_YOLO_DATA_DIR, \
+from darkcyan.constants import DEFAULT_TRAINING_YOLO_DATA_DIR, \
                                DEFAULT_TRAINING_YOLO_CONFIG_DIR, \
                                DEFAULT_TRAINING_YOLO_OUTPUT_DIR, \
                                DEFAULT_YOLO_TRAINING_CONFIG, \
                                DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR, \
                                YOLOMODELMAP, \
+                               YOLOBATCHSIZEMAP, \
                                YoloBaseModels, \
-                               DataType, DEFAULT_DET_TRAINING_YAML
+                               DataType, \
+                               DEFAULT_DET_TRAINING_YAML
 
-from ultralytics import YOLO
 
 def get_platform():
     platforms = {
-        'linux1' : 'Linux',
-        'linux2' : 'Linux',
-        'darwin' : 'Darwin',
-        'win32' : 'Windows'
+        'linux1': 'Linux',
+        'linux2': 'Linux',
+        'darwin': 'Darwin',
+        'win32': 'Windows'
     }
     if sys.platform not in platforms:
         return sys.platform
@@ -49,8 +45,8 @@ def get_platform():
 
 
 platform = get_platform()
-
 term = Terminal()
+
 
 def train():
     """Train the model"""
@@ -64,10 +60,10 @@ def train():
     training_data_root = Path(Config.get_value("training_data_root"))
     temp_dir_root = Path(Config.get_value("temp_dir"))
 
-        ## Load config
+    ## Load config
     config_file = training_data_root / \
-                    DEFAULT_TRAINING_YOLO_CONFIG_DIR / \
-                    DEFAULT_YOLO_TRAINING_CONFIG
+        DEFAULT_TRAINING_YOLO_CONFIG_DIR / \
+        DEFAULT_YOLO_TRAINING_CONFIG
 
     print(f'Loading config from {config_file}')
 
@@ -106,7 +102,7 @@ def train():
         base_model = last_run
         resume=True
     else:
-        base_model = YOLOMODELMAP[yolo_version][data_type][model_size]
+        base_model = YOLOMODELMAP[data_type][yolo_version][model_size]
         resume=False
 
     print(base_model, last_run, resume)

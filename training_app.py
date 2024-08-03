@@ -1,14 +1,3 @@
-import difflib
-import shutil
-import sys
-from pathlib import Path
-
-from blessed import Terminal
-from rich.progress import Progress
-
-import functools
-echo = functools.partial(print, end='', flush=True)
-
 from darkcyan_tools.classify_data_utilities import (
     create_yolo_classification_dataset,
 )
@@ -19,12 +8,15 @@ from darkcyan.constants import (
     DEFAULT_DET_SRC_NAME,
     DEFAULT_TRAINING_YOLO_CONFIG_DIR,
     DEFAULT_TRAINING_YOLO_DATA_DIR,
+    YOLOMODELMAP,
     DataTag,
     DataType,
+    YoloVersion,
     YoloBaseModels,
 )
 from darkcyan_tools.training_utils import create_config_file
-from darkcyan_tools.detection_data_utilities import create_yolo_detection_dataset
+from darkcyan_tools.detection_data_utilities \
+    import create_yolo_detection_dataset
 from darkcyan_tools.google_drive_utils import (
     delete_file,
     get_directory_id_from_path,
@@ -42,6 +34,17 @@ from darkcyan_tools.local_data_utils import (
     remove_scratch_version,
 )
 
+import difflib
+import shutil
+import sys
+from pathlib import Path
+
+from blessed import Terminal
+from rich.progress import Progress
+
+import functools
+
+echo = functools.partial(print, end='', flush=True)
 term = Terminal()
 
 
@@ -60,6 +63,23 @@ def ask_for_dataset_type():
 
     datatype = DataType.__call__(int(inp))
     return datatype
+
+
+def ask_for_yolo_version(dataType):
+    print()
+    print(term.white(f"Select Yolo Version for {dataType.name} training"))
+    for choice, yoloVersion in enumerate(YOLOMODELMAP[dataType], start=1):
+        print(term.white(f"{choice}: {yoloVersion.name}"))
+
+    with term.cbreak():
+        choice = term.inkey()
+        if choice not in [str(i) for i in range(1, len(YoloBaseModels) + 1)]:
+            print(term.red(f"Illogical choice {choice}"))
+            return
+    # never going to work...
+    yoloVersion = YOLOMODELMAP[dataType](int(choice))
+
+    return yoloVersion
 
 
 def ask_for_data_version(datatype, tag):
@@ -82,7 +102,8 @@ def upload_to_google_drive():
     datatype = ask_for_dataset_type()
     version = ask_for_data_version(datatype, DataTag.temp)
 
-    file_to_upload = get_local_zipfile_for_version(version, datatype, tag=DataTag.temp)
+    file_to_upload = get_local_zipfile_for_version(version, datatype,
+                                                   tag=DataTag.temp)
     if not file_to_upload.exists():
         print(term.red(f"{file_to_upload} not found to upload"))
         return
@@ -93,7 +114,8 @@ def upload_to_google_drive():
     if existing_files:
         print(
             term.red(
-                f"Found existing {len(existing_files)} file(s) with name {file_to_upload.name} - overwrite? (y/N)"
+                f"Found existing {len(existing_files)} file(s) with name \
+                    {file_to_upload.name} - overwrite? (y/N)"
             )
         )
         with term.cbreak():
@@ -107,6 +129,7 @@ def upload_to_google_drive():
                 return
 
     upload_file(file_to_upload, parent_dir, mimetype="application/zip")
+
 
 def get_integer_input():
     with term.cbreak():
@@ -424,6 +447,7 @@ def remove_and_recreate_temp_directory():
 def create_colab_training_config():
     datatype = ask_for_dataset_type()
     version = ask_for_data_version(datatype, DataTag.temp)
+    yoloVersion = ask_for_yolo_version(datatype)
 
     print(term.white(f"Select modelsize to train"))
     for choice, model in enumerate(YoloBaseModels, start=1):
