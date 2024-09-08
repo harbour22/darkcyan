@@ -176,11 +176,8 @@ class ObjectDetection(object):
         else:
             self.device='0'
 
-        #self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov9_4.15_large-det.mlpackage', task='detect', verbose=False)
-        self.model = YOLO('yolov8x.mlpackage', task='detect', verbose=False)
+        self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov9_4.15_large-det.mlpackage', task='detect', verbose=False)
         
-
-
         self.logger.debug('Warming yolo detection engine for image size: ' + str(self.imgsz))
         detection_engine_pf = Profile()
 
