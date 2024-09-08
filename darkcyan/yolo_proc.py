@@ -1,3 +1,5 @@
+import logging,logging.handlers
+
 import os
 import traceback
 import ast
@@ -15,7 +17,8 @@ from darkcyan_utils.FPS import FPS
 import darkcyan_utils.SignalMonitor as SignalMonitor
 
 import cv2
-import logging,logging.handlers
+from datetime import datetime
+
 
 from queue import Queue, Empty, Full
 
@@ -45,9 +48,11 @@ class Profile(contextlib.ContextDecorator):
         
 class DarkCyanVideoSource:
 
-    def __init__(self, source_name, source_path, source_fps, output_image_queue, model_imgsz, keep_running):
-        self.logger = logging.getLogger("darkcyan")
-
+    def __init__(self, logging_queue, source_name, source_path, source_fps, output_image_queue, model_imgsz, keep_running):
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+                
         self.source_name = source_name
         self.source_path = source_path        
        
@@ -148,9 +153,12 @@ class DarkCyanVideoSource:
 
 class DarkCyanObjectDetection(object):
 
-    def __init__(self, source_name, inference_fps, image_source_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running) -> None:
+    def __init__(self, logging_queue, source_name, inference_fps, image_source_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running) -> None:
         
-        self.logger = logging.getLogger("darkcyan")
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+            
         self.source_name = source_name
         self.fps_feedback = inference_fps
         self.fps = FPS()
@@ -168,7 +176,7 @@ class DarkCyanObjectDetection(object):
         else:
             self.device='0'
 
-        self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov8_4.11_large-det.mlpackage', task='detect')
+        self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov8_4.11_large-det.mlpackage', task='detect', verbose=False)
         
         self.logger.debug('Warming yolo detection engine for image size: ' + str(self.imgsz))
         detection_engine_pf = Profile()
@@ -176,7 +184,7 @@ class DarkCyanObjectDetection(object):
         test_img = np.random.randint(low=0, high=255, size=(640, 480, 3), dtype='uint8')
         with detection_engine_pf:
             try:
-                results = self.model.predict(source=test_img, imgsz=(640,480), device=self.device, conf=0.4, iou=0.45)                    
+                results = self.model.predict(source=test_img, imgsz=(640,480), device=self.device, conf=0.4, iou=0.45, stream=True, verbose=False)                    
             except:
                 traceback.print_exc()
                 self.stop()
@@ -325,11 +333,16 @@ class DarkCyanObjectDetection(object):
         self.stopped = True    
         time.sleep(1)    
 
-def run(source_name, source_path, buffer_lock, source_fps, inference_fps, infer_shared_memory, status_shared_memory, results_queue, keep_running):
+def run(logging_queue, source_name, source_path, buffer_lock, source_fps, inference_fps, infer_shared_memory, status_shared_memory, results_queue, keep_running):
+
+    qh = logging.handlers.QueueHandler(logging_queue)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(qh)
 
     output_image_queue = Queue(5)
-    inference_engine = DarkCyanObjectDetection(source_name, inference_fps, output_image_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running)
-    image_stream = DarkCyanVideoSource(source_name, source_path, source_fps, output_image_queue, inference_engine.imgsz, keep_running)
+    inference_engine = DarkCyanObjectDetection(logging_queue, source_name, inference_fps, output_image_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running)
+    image_stream = DarkCyanVideoSource(logging_queue, source_name, source_path, source_fps, output_image_queue, inference_engine.imgsz, keep_running)
 
     image_stream.start()
     inference_engine.start()

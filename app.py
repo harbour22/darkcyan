@@ -1,9 +1,11 @@
 import logging
 import logging.handlers
+import json
 import os
 import os.path
 import time
 from datetime import datetime
+import threading
 from multiprocessing import Lock, Process, Value, Queue
 from multiprocessing.managers import SharedMemoryManager
 from pathlib import Path
@@ -11,22 +13,19 @@ from pathlib import Path
 import yaml
 from rich.progress import Progress, TextColumn
 
-import darkcyan.camera_process_yolo
+import darkcyan.yolo_proc
 import darkcyan_utils.SignalMonitor as SignalMonitor
 from darkcyan.config import Config
 
-LOG_FILENAME = f'logs/vision-{datetime.now().strftime("%d%b%y")}-{os.getpid()}.log'
-os.makedirs(os.path.dirname(LOG_FILENAME), exist_ok=True)
-handler = logging.handlers.TimedRotatingFileHandler(
-    LOG_FILENAME, when="midnight", backupCount=3
-)
-formatter = logging.Formatter(
-    "%(asctime)-15s %(levelname)-6s %(message)s", "%c"
-)
-handler.setFormatter(formatter)
-log = logging.getLogger("darkcyan")
-log.addHandler(handler)
-log.setLevel(logging.DEBUG)
+def logger_thread(q):
+
+    while True:
+        record = q.get()
+        if record is None:
+            break
+        logger = logging.getLogger(record.name)
+        logger.handle(record)
+
 
 class DarkCyanSourceConfig:
 
@@ -39,7 +38,9 @@ class DarkCyanSourceConfig:
         self.inference_fps = Value("f")        
         self.keep_running = keep_running
 
-def run():
+def run(logging_queue):
+
+    log = logging.getLogger(__name__)
 
     with open(        
         Config.get_value("config_file"), "r"
@@ -79,8 +80,10 @@ def run():
         video_sources[source]["shm_status"] = status_shared_memory
 
         process = Process(
-            target=darkcyan.camera_process_yolo.run,
+            name = process_config.source_name,
+            target=darkcyan.yolo_proc.run,
             args=[
+                logging_queue,
                 process_config.source_name,
                 process_config.source_path,
                 process_config.buffer_lock,
@@ -138,5 +141,26 @@ def run():
 
 
 if __name__ == "__main__":
-    log.info("Starting Process")
-    run()
+
+    logging_queue = Queue()
+
+    fh = logging.handlers.TimedRotatingFileHandler(f'logs/vision-app-{datetime.now().strftime("%d%b%y")}-{os.getpid()}.log', when="midnight", backupCount=3)
+    formatter = logging.Formatter("%(asctime)s %(name)-18s %(levelname)-8s %(processName)-12s %(message)s")
+    fh.setFormatter(formatter)
+    logger = logging.getLogger()
+    logger.addHandler(fh)
+
+    lp = threading.Thread(target=logger_thread, args=(logging_queue,))
+    lp.start()   
+
+    log = logging.getLogger(__name__)
+    qh = logging.handlers.QueueHandler(logging_queue)    
+    log.setLevel(logging.INFO)
+    
+
+    log.info("Starting main process")
+    run(logging_queue)
+    log.info("Ending main process")
+    # And now tell the logging thread to finish up, too
+    logging_queue.put(None)
+    lp.join()
