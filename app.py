@@ -4,6 +4,7 @@ import os
 import os.path
 import time
 from datetime import datetime
+import threading
 from multiprocessing import Lock, Process, Value, Queue
 from multiprocessing.managers import SharedMemoryManager
 from pathlib import Path
@@ -11,22 +12,22 @@ from pathlib import Path
 import yaml
 from rich.progress import Progress, TextColumn
 
-import darkcyan.camera_process_yolo
+import darkcyan.yolo_proc
 import darkcyan_utils.SignalMonitor as SignalMonitor
 from darkcyan.config import Config
 
-LOG_FILENAME = f'logs/vision-{datetime.now().strftime("%d%b%y")}-{os.getpid()}.log'
-os.makedirs(os.path.dirname(LOG_FILENAME), exist_ok=True)
-handler = logging.handlers.TimedRotatingFileHandler(
-    LOG_FILENAME, when="midnight", backupCount=3
-)
-formatter = logging.Formatter(
-    "%(asctime)-15s %(levelname)-6s %(message)s", "%c"
-)
-handler.setFormatter(formatter)
-log = logging.getLogger("darkcyan")
-log.addHandler(handler)
-log.setLevel(logging.DEBUG)
+import cv2
+import numpy as np
+
+def logger_thread(q):
+
+    while True:
+        record = q.get()
+        if record is None:
+            break
+        logger = logging.getLogger(record.name)
+        logger.handle(record)
+
 
 class DarkCyanSourceConfig:
 
@@ -39,7 +40,9 @@ class DarkCyanSourceConfig:
         self.inference_fps = Value("f")        
         self.keep_running = keep_running
 
-def run():
+def run(logging_queue):
+
+    log = logging.getLogger(__name__)
 
     with open(        
         Config.get_value("config_file"), "r"
@@ -63,7 +66,7 @@ def run():
     smm = SharedMemoryManager()    
     smm.start()
 
-    results_queue = Queue(5)
+    results_queue = Queue(50)
     
     for source in video_sources:
         process_config = video_sources[source]["vs"]
@@ -76,11 +79,15 @@ def run():
         status_shared_memory.buf[99] = len(status)
 
         video_sources[source]["ishm"] = infer_shared_memory
+        video_sources[source]["ishm_np"] = np.ndarray((960,1280,3), dtype=np.uint8, buffer=infer_shared_memory.buf)
         video_sources[source]["shm_status"] = status_shared_memory
+        video_sources[source]["source_name"] = process_config.source_name
 
         process = Process(
-            target=darkcyan.camera_process_yolo.run,
+            name = process_config.source_name,
+            target=darkcyan.yolo_proc.run,
             args=[
+                logging_queue,
                 process_config.source_name,
                 process_config.source_path,
                 process_config.buffer_lock,
@@ -111,32 +118,71 @@ def run():
             log.info(f"Starting Process {video_sources[source]['vs'].source_name}")
             process.start()
             log.info(f"Started Process {video_sources[source]['vs'].source_name}")
-
+        
         while (
             ((time.time() - start_time) < run_for)
             and not signal_monitor.exit_now
             and keep_running.value
         ):
 
-            #time.sleep(0.1)
+
             for source in video_sources:
                 vsc = video_sources[source]["vs"]
                 str_len = video_sources[source]["shm_status"].buf[99]
                 update_txt = f"[green] Camera [green]{vsc.source_name}. [green] Status [green]{bytes(video_sources[source]['shm_status'].buf[:str_len]).decode('utf-8')  }.  " \
                     f"[blue] Source FPS: [blue] {vsc.source_fps.value:.2f}, [blue] Infer FPS: [blue] {vsc.inference_fps.value:.2f}"
                 progress.update(video_sources[source]["task"], description=update_txt)
+                infer_mapped_np = video_sources[source]["ishm_np"]
+                cv2.imshow(video_sources[source]["source_name"],infer_mapped_np)
+                if cv2.waitKey(25) & 0xFF == ord('q'):
+                    keep_running.value = False
 
             if(not results_queue.empty()):
-                final_result_categories, final_result_boxes = results_queue.get(block=False)
-                log.info(f"Result: {final_result_categories}, {final_result_boxes}")
+                try:
+                    event_source, event_categories, event_boxes = results_queue.get(block=False)
+                    log.debug(f"Result: {event_source} - {event_categories} ({event_boxes})")
+                    
+                    ## update screen
+                    
+                    for box in event_boxes:
+                        infer_mapped_np = cv2.rectangle(infer_mapped_np, (box[0], box[1] ), (box[2], box[3]), (0, 0, 100), 1)
+
+                    cv2.imshow(event_source,infer_mapped_np)
+                    if cv2.waitKey(25) & 0xFF == ord('q'):
+                        keep_running.value = False
+                except:
+                    log.error("Results queue unexpectedly empty, continuing")
+                    
             else:
-                time.sleep(0.1)
+                time.sleep(0.001)
+            
+            
 
         keep_running.value = False
+        cv2.destroyAllWindows()
         time.sleep(2)
         smm.shutdown()
 
 
 if __name__ == "__main__":
-    log.info("Starting Process")
-    run()
+
+    logging_queue = Queue()
+
+    fh = logging.handlers.TimedRotatingFileHandler(f'logs/vision-app-{datetime.now().strftime("%d%b%y")}-{os.getpid()}.log', when="midnight", backupCount=3)
+    formatter = logging.Formatter("%(asctime)s %(name)-18s %(levelname)-8s %(processName)-12s %(message)s")
+    fh.setFormatter(formatter)
+    logger = logging.getLogger()
+    logger.addHandler(fh)
+
+    lp = threading.Thread(target=logger_thread, args=(logging_queue,))
+    lp.start()   
+
+    log = logging.getLogger(__name__)
+    qh = logging.handlers.QueueHandler(logging_queue)    
+    log.setLevel(logging.INFO)
+    
+    run(logging_queue)
+    
+    # And now tell the logging thread to finish up, too
+    logging_queue.put(None)
+    lp.join()

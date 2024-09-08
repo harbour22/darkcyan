@@ -1,3 +1,5 @@
+import logging,logging.handlers
+
 import os
 import traceback
 import ast
@@ -15,7 +17,8 @@ from darkcyan_utils.FPS import FPS
 import darkcyan_utils.SignalMonitor as SignalMonitor
 
 import cv2
-import logging,logging.handlers
+from datetime import datetime
+
 
 from queue import Queue, Empty, Full
 
@@ -43,11 +46,13 @@ class Profile(contextlib.ContextDecorator):
     
 
         
-class DarkCyanVideoSource:
+class VideoSource:
 
     def __init__(self, source_name, source_path, source_fps, output_image_queue, model_imgsz, keep_running):
-        self.logger = logging.getLogger("darkcyan")
-
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+                
         self.source_name = source_name
         self.source_path = source_path        
        
@@ -146,11 +151,14 @@ class DarkCyanVideoSource:
         self.stream.release()
         cv2.destroyAllWindows()
 
-class DarkCyanObjectDetection(object):
+class ObjectDetection(object):
 
     def __init__(self, source_name, inference_fps, image_source_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running) -> None:
         
-        self.logger = logging.getLogger("darkcyan")
+        
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+            
         self.source_name = source_name
         self.fps_feedback = inference_fps
         self.fps = FPS()
@@ -168,15 +176,18 @@ class DarkCyanObjectDetection(object):
         else:
             self.device='0'
 
-        self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov8_4.11_large-det.mlpackage', task='detect')
+        #self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov9_4.15_large-det.mlpackage', task='detect', verbose=False)
+        self.model = YOLO('yolov8x.mlpackage', task='detect', verbose=False)
         
+
+
         self.logger.debug('Warming yolo detection engine for image size: ' + str(self.imgsz))
         detection_engine_pf = Profile()
 
         test_img = np.random.randint(low=0, high=255, size=(640, 480, 3), dtype='uint8')
         with detection_engine_pf:
             try:
-                results = self.model.predict(source=test_img, imgsz=(640,480), device=self.device, conf=0.4, iou=0.45)                    
+                results = self.model.predict(source=test_img, imgsz=(640,480), device=self.device, conf=0.4, iou=0.45, stream=True, verbose=False)                    
             except:
                 traceback.print_exc()
                 self.stop()
@@ -185,20 +196,14 @@ class DarkCyanObjectDetection(object):
             results = self.model.predict(source=test_img, device=self.device, conf=0.4, iou=0.45)                    
         self.logger.debug (f"Second warmup completed in :{detection_engine_pf.dt * 1E3:.1f}ms")
 
-        self.results_queue = Queue(5)
+        #self.results_queue = Queue(5)
         self.image_source_queue = image_source_queue
 
     def infer(self):
         # keep looping infinitely
         self.fps.start()
         time_since_last_image = time.time()
-        fourcc_fmt = cv2.VideoWriter_fourcc(*'X264')
-        out_send = cv2.VideoWriter('appsrc ! \
-                                videoconvert ! x264enc speed-preset=veryfast tune=zerolatency bitrate=2048 ! \
-                                rtph264pay pt=96 name=pay0 ! application/x-rtp,media=video,encoding-name=H264 ! \
-                                udpsink host=127.0.0.1 port=5400 async=false',
-                                fourcc=fourcc_fmt, apiPreference=cv2.CAP_GSTREAMER, fps=25, frameSize = (1280,960), isColor=True)
-
+        
         while not self.stopped and self.keep_running.value:
                    
             try:
@@ -214,9 +219,8 @@ class DarkCyanObjectDetection(object):
                 time_since_last_image = time.time()
                  
                 orig_h,orig_w,orig_d = original_frame.shape
-                #h,w = image_raw.shape
 
-                results = self.model.predict(source=inference_img, device=self.device, conf=0.4, iou=0.45, stream=True, verbose=False)    
+                results = self.model.predict(source=inference_img, device=self.device, conf=0.3, iou=0.40, stream=True, verbose=False)    
                                 
                 self.fps_feedback.value = self.fps.fps()               
 
@@ -259,7 +263,7 @@ class DarkCyanObjectDetection(object):
                                                             
                             result_categories.append(category)
 
-                            original_frame = cv2.rectangle(original_frame, (xyxy[0], xyxy[1] ), (xyxy[2], xyxy[3]), (0, 255, 0), 1)
+                            original_frame = cv2.rectangle(original_frame, (xyxy[0], xyxy[1] ), (xyxy[2], xyxy[3]), (255, 255, 255), 3)
                                                         
                 if(len(result_categories))>0:                                                      
                     status = f'{self.source_name} can see {result_categories}'
@@ -268,12 +272,8 @@ class DarkCyanObjectDetection(object):
 
                 self.status_shared_memory.buf[:len(status)] = status.encode('utf-8')
                 self.status_shared_memory.buf[99] = len(status)
-                if(self.source_name=='reolink4k-front'):
-                    out_send.write(original_frame)
 
-                if(len(result_categories)>0):
-                    #cv2.imwrite(f'output_{self.source_name}.png', original_frame)
-                    
+                if(len(result_categories)!=1000):
 
                     output_frame = original_frame
                     locked = self.buffer_lock.acquire(block=False)
@@ -287,7 +287,7 @@ class DarkCyanObjectDetection(object):
                             if(self.results_queue.full()):
                                 self.logger.debug("[WARN] Results queue is full, clearing some space")
                                 self.results_queue.get(block=False)
-                            self.results_queue.put(( result_categories, result_boxes ), block=False )
+                            self.results_queue.put(( self.source_name, result_categories, result_boxes ), block=False )
                             self.logger.debug(f"Added {result_categories} to results queue")
                         except Full:
                             self.logger.debug("[WARN] Not able to add to the results queue, continuing.  This is wholly unexpected")
@@ -325,11 +325,16 @@ class DarkCyanObjectDetection(object):
         self.stopped = True    
         time.sleep(1)    
 
-def run(source_name, source_path, buffer_lock, source_fps, inference_fps, infer_shared_memory, status_shared_memory, results_queue, keep_running):
+def run(logging_queue, source_name, source_path, buffer_lock, source_fps, inference_fps, infer_shared_memory, status_shared_memory, results_queue, keep_running):
+
+    qh = logging.handlers.QueueHandler(logging_queue)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(qh)
 
     output_image_queue = Queue(5)
-    inference_engine = DarkCyanObjectDetection(source_name, inference_fps, output_image_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running)
-    image_stream = DarkCyanVideoSource(source_name, source_path, source_fps, output_image_queue, inference_engine.imgsz, keep_running)
+    inference_engine = ObjectDetection(source_name, inference_fps, output_image_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running)
+    image_stream = VideoSource(source_name, source_path, source_fps, output_image_queue, inference_engine.imgsz, keep_running)
 
     image_stream.start()
     inference_engine.start()

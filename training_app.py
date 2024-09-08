@@ -51,7 +51,7 @@ term = Terminal()
 def ask_for_dataset_type():
     print()
     print(
-        term.white(
+        term.magenta(
             f"What type of dataset? (1: {DataType.det.name}, 2: {DataType.cls.name})"
         )
     )
@@ -67,9 +67,9 @@ def ask_for_dataset_type():
 
 def ask_for_yolo_version(dataType):
     print()
-    print(term.white(f"Select Yolo Version for {dataType.name} training"))
+    print(term.magenta(f"Select Yolo Version for {dataType.name} training"))
     for choice, yoloVersion in enumerate(YOLOMODELMAP[dataType], start=1):
-        print(term.white(f"{choice}: {yoloVersion.name}"))
+        print(term.magenta(f"{choice}: {yoloVersion.name}"))
 
     with term.cbreak():
         choice = term.inkey()
@@ -89,9 +89,9 @@ def ask_for_data_version(datatype, tag):
         print(term.red(f"No data found, any key to continue"))
         return None
 
-    print(term.white(f"Choose the {tag.name} version: "))
+    print(term.magenta(f"Choose the {tag.name} version: "))
     for choice, version in enumerate(versions, start=1):
-        print(term.white(f"{choice}: {version}"))
+        print(term.magenta(f"{choice}: {version}"))
 
     with term.cbreak():
         version = versions[int(term.inkey()) - 1]
@@ -125,7 +125,7 @@ def upload_to_google_drive():
             if overwrite == "y":
                 for file in existing_files:
                     delete_file(file["id"])
-                    print(term.white(f"Deleted {file}"))
+                    print(term.magenta(f"Deleted {file}"))
             else:
                 return
 
@@ -169,9 +169,9 @@ def trim_detection_dataset():
         print(term.red(f"No images found"))
         return
 
-    print(term.white(f"Choose the image directory: "))
+    print(term.magenta(f"Choose the image directory: "))
     for choice, image_dir in enumerate(image_dirs, start=1):
-        print(term.white(f"{choice}: {image_dir.name}"))
+        print(term.magenta(f"{choice}: {image_dir.name}"))
     inp = ""
     with term.cbreak():
         inp = term.inkey()
@@ -181,9 +181,9 @@ def trim_detection_dataset():
     
     ext = '.jpg'
     n_files = len([p for p in image_dir.iterdir() if p.suffix==f'{ext}'])
-    print(term.white(f"Found {n_files} {ext} files"))
+    print(term.magenta(f"Found {n_files} {ext} files"))
 
-    print(term.white(f"How many images to keep?"))
+    print(term.magenta(f"How many images to keep?"))
 
     image_cnt = get_integer_input()
 
@@ -202,7 +202,7 @@ def trim_detection_dataset():
             yolo_file.unlink()
             continue
 
-    print(term.white(f"Kept {keep} images"))
+    print(term.magenta(f"Kept {keep} images"))
 
 def run_labelimg():
     data_version = ask_for_data_version(DataType.det, DataTag.scratch)
@@ -220,9 +220,9 @@ def run_labelimg():
         print(term.red(f"No images found"))
         return
 
-    print(term.white(f"Choose the image directory: "))
+    print(term.magenta(f"Choose the image directory: "))
     for choice, image_dir in enumerate(image_dirs, start=1):
-        print(term.white(f"{choice}: {image_dir.name}"))
+        print(term.magenta(f"{choice}: {image_dir.name}"))
     inp = ""
     with term.cbreak():
         inp = term.inkey()
@@ -289,7 +289,7 @@ def run_labelimg():
                             parent_directory / DEFAULT_CLASSES_TXT,
                         )
                         print(
-                            term.white(
+                            term.magenta(
                                 f"Copied {image_dir / DEFAULT_CLASSES_TXT} to {parent_directory / DEFAULT_CLASSES_TXT}"
                             )
                         )
@@ -312,14 +312,14 @@ def author_new_dataset():
     major_version = int(base_version.split(".")[0])
     minor_version = int(base_version.split(".")[1])
 
-    print(term.white(f"Choose major or minor version: "))
+    print(term.magenta(f"Choose major or minor version: "))
     print(
-        term.white(
+        term.magenta(
             f"1: Major Version Increment ({base_version} to {major_version+1}.0)"
         )
     )
     print(
-        term.white(
+        term.magenta(
             f"2: Minor Version Increment ({base_version} to {major_version}.{minor_version+1})"
         )
     )
@@ -404,7 +404,7 @@ def remove_working_copy_of_data():
     )
     if source_data_name.exists():
         remove_scratch_version(scratch_version, datatype)
-        print(term.white(f"Removed {source_data_name}"))
+        print(term.magenta(f"Removed {source_data_name}"))
     else:
         print(term.red(f"No existing {source_data_name} found."))
 
@@ -422,11 +422,11 @@ def prepare_data_for_training():
         create_training_zipfile(training_version, DataType.det)
 
     if datatype == DataType.cls:
-        print(term.white(f"Create/use letterbox version? (y/n)"))
+        print(term.magenta(f"Create/use letterbox version? (y/n)"))
         use_letterbox = False
         with term.cbreak():
             letterbox = term.inkey()
-            print(term.white(f"{letterbox}"))
+            print(term.magenta(f"{letterbox}"))
             if letterbox == "y":
                 use_letterbox = True
                 training_version = f"{src_version}lb"
@@ -450,9 +450,9 @@ def create_colab_training_config():
     version = ask_for_data_version(datatype, DataTag.temp)
     yoloVersion = ask_for_yolo_version(datatype)
 
-    print(term.white(f"Select modelsize to train"))
+    print(term.magenta(f"Select modelsize to train"))
     for choice, model in enumerate(YoloBaseModels, start=1):
-        print(term.white(f"{choice}: {model.name}"))
+        print(term.magenta(f"{choice}: {model.name}"))
 
     with term.cbreak():
         choice = term.inkey()
@@ -480,12 +480,12 @@ def create_colab_training_config():
                 if overwrite == "y":
                     for file in existing_files:
                         delete_file(file["id"])
-                        print(term.white(f"Deleted {file}"))
+                        print(term.magenta(f"Deleted {file}"))
                 else:
                     return
 
         upload_file(config_file, google_parent_dir, "application/json")
-        print(term.white(f"Uploaded {config_file} to {google_parent_dir}"))
+        print(term.magenta(f"Uploaded {config_file} to {google_parent_dir}"))
 
 
 def print_command_menu():
@@ -499,7 +499,7 @@ def print_command_menu():
 
 
 def quit():
-    print(term.white(f"Bye!"))
+    print(term.magenta(f"Bye!"))
     sys.exit(0)
 
 
@@ -544,11 +544,11 @@ def run():
     print_command_menu()
     while True:
         print()
-        print(term.white(f"Select an option: {term.blue(f'(m for menu, q to quit)')}"))
+        print(term.magenta(f"Select an option: {term.blue(f'(m for menu, q to quit)')}"))
         inp = ""
         with term.cbreak():
             inp = term.inkey()
-            print(term.white(f"{inp}"))
+            print(term.magenta(f"{inp}"))
 
             command = [command for command in command_options if command[0] == inp]
             if len(command) == 0:
@@ -559,7 +559,7 @@ def run():
                 0
             ]  ## In case we have multiple commands mapped to the same key
 
-            print(term.white(f"Running " + term.blue(f"{command[1]}")))
+            print(term.magenta(f"Running " + term.blue(f"{command[1]}")))
             command[2]()
 
 

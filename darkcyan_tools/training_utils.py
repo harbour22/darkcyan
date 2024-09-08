@@ -149,7 +149,7 @@ def create_config_file(version, type=DataType.det, basemodel=YoloBaseModels.nano
     config = {}
     config["version"] = version
     config["type"] = type.name
-    config["yolov"] = yoloVersion
+    config["yolov"] = yoloVersion.name
     config["training_data"] = get_training_zip_name(version, type, True)
     config["basemodel"] = basemodel.name
 

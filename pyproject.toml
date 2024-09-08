@@ -21,7 +21,7 @@ ultralytics = "^8.2"
 imutils = "^0.5.4"
 lapx = "^0.5.5"
 ffmpeg-python = "^0.2.0"
-#coremltools = "^7.1"
+coremltools = "^7.2"
 onnx = "^1.15.0"
 
 
