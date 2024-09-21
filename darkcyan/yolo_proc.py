@@ -282,10 +282,9 @@ class ObjectDetection(object):
                         self.buffer_lock.release()
                         try:
                             if(self.results_queue.full()):
-                                self.logger.debug("[WARN] Results queue is full, clearing some space")
+                                # not my problem to complain..  Get the oldest and add this as the newest (queue is fifo)
                                 self.results_queue.get(block=False)
                             self.results_queue.put(( self.source_name, result_categories, result_boxes ), block=False )
-                            self.logger.debug(f"Added {result_categories} to results queue")
                         except Full:
                             self.logger.debug("[WARN] Not able to add to the results queue, continuing.  This is wholly unexpected")
                                             
@@ -295,7 +294,6 @@ class ObjectDetection(object):
 
             except Empty:
                 self.logger.debug("[WARN] No more frames to infer from after 15 seconds, exiting")
-                self.stop()
                 
             except Full:
                 self.logger.debug("[WARN] Not able to add to the results queue, continuing.  This is wholly unexpected")

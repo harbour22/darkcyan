@@ -70,7 +70,7 @@ def run(logging_queue):
     
     for source in video_sources:
         process_config = video_sources[source]["vs"]
-        infer_shared_memory = smm.SharedMemory(size=1280 * 960 * 3)
+        infer_shared_memory = smm.SharedMemory(size=1280 * 720 * 3)
         status_shared_memory = smm.SharedMemory(size=100)
 
         status = f"Initialising {process_config.source_name}..."
@@ -79,7 +79,7 @@ def run(logging_queue):
         status_shared_memory.buf[99] = len(status)
 
         video_sources[source]["ishm"] = infer_shared_memory
-        video_sources[source]["ishm_np"] = np.ndarray((960,1280,3), dtype=np.uint8, buffer=infer_shared_memory.buf)
+        video_sources[source]["ishm_np"] = np.ndarray((720,1280,3), dtype=np.uint8, buffer=infer_shared_memory.buf)
         video_sources[source]["shm_status"] = status_shared_memory
         video_sources[source]["source_name"] = process_config.source_name
 
@@ -102,7 +102,7 @@ def run(logging_queue):
         video_sources[source]["process"] = process
 
     start_time = time.time()
-    run_for = 60 * 60
+    run_for = 60 * 6000
 
     progress = Progress(TextColumn("[progress.descriptions]{task.description}"))
 
