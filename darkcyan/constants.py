@@ -5,7 +5,7 @@ DEFAULT_CONFIG_DIR = Path.home() / ".darkcyan"
 
 DataType = Enum("DataType", ["det", "cls"])
 DataTag = Enum("DataTag", ["main", "scratch", "temp"])
-YoloVersion = Enum("YoloVersion", ["v8", "v9", "v10"])
+YoloVersion = Enum("YoloVersion", ["v8", "v9", "v10", "v11"])
 YoloBaseModels = Enum("YoloBaseModels", ["xlarge", "large", "medium",
                                          "small", "nano"])
 
@@ -34,6 +34,13 @@ YOLOMODELMAP = {
                 YoloBaseModels.medium: "yolov8m-cls.pt",
                 YoloBaseModels.small: "yolov8s-cls.pt",
                 YoloBaseModels.nano: "yolov8n-cls.pt",
+            },
+            YoloVersion.v11: {
+                YoloBaseModels.xlarge: "yolov11x-cls.pt",
+                YoloBaseModels.large: "yolov11l-cls.pt",
+                YoloBaseModels.medium: "yolov11m-cls.pt",
+                YoloBaseModels.small: "yolov11s-cls.pt",
+                YoloBaseModels.nano: "yolov11n-cls.pt",
             }
         },
         DataType.det: {
@@ -57,6 +64,13 @@ YOLOMODELMAP = {
                 YoloBaseModels.medium: "yolov10m.pt",
                 YoloBaseModels.small: "yolov10s.pt",
                 YoloBaseModels.nano: "yolov10n.pt",
+            },
+            YoloVersion.v11: {
+                YoloBaseModels.xlarge: "yolov11x.pt",
+                YoloBaseModels.large: "yolov11l.pt",
+                YoloBaseModels.medium: "yolov11m.pt",
+                YoloBaseModels.small: "yolov11s.pt",
+                YoloBaseModels.nano: "yolov11n.pt",
             },
         },
     }
