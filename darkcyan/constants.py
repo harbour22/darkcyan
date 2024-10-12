@@ -36,11 +36,11 @@ YOLOMODELMAP = {
                 YoloBaseModels.nano: "yolov8n-cls.pt",
             },
             YoloVersion.v11: {
-                YoloBaseModels.xlarge: "yolov11x-cls.pt",
-                YoloBaseModels.large: "yolov11l-cls.pt",
-                YoloBaseModels.medium: "yolov11m-cls.pt",
-                YoloBaseModels.small: "yolov11s-cls.pt",
-                YoloBaseModels.nano: "yolov11n-cls.pt",
+                YoloBaseModels.xlarge: "yolo11x-cls.pt",
+                YoloBaseModels.large: "yolo11l-cls.pt",
+                YoloBaseModels.medium: "yolo11m-cls.pt",
+                YoloBaseModels.small: "yolo11s-cls.pt",
+                YoloBaseModels.nano: "yolo11n-cls.pt",
             }
         },
         DataType.det: {
@@ -66,11 +66,11 @@ YOLOMODELMAP = {
                 YoloBaseModels.nano: "yolov10n.pt",
             },
             YoloVersion.v11: {
-                YoloBaseModels.xlarge: "yolov11x.pt",
-                YoloBaseModels.large: "yolov11l.pt",
-                YoloBaseModels.medium: "yolov11m.pt",
-                YoloBaseModels.small: "yolov11s.pt",
-                YoloBaseModels.nano: "yolov11n.pt",
+                YoloBaseModels.xlarge: "yolo11x.pt",
+                YoloBaseModels.large: "yolo11l.pt",
+                YoloBaseModels.medium: "yolo11m.pt",
+                YoloBaseModels.small: "yolo11s.pt",
+                YoloBaseModels.nano: "yolo11n.pt",
             },
         },
     }
