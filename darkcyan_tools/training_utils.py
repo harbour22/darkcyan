@@ -125,8 +125,8 @@ def train():
     end_time = time.time()     
 
 
-    engine_file_name = f"yolov8_{config['version']}_{config['basemodel']}-{config['type']}.pt"
-    config_file_name = f"yolov8_{config['version']}_{config['basemodel']}-{config['type']}.json"
+    engine_file_name = f"yolo{yolo_version}_{config['version']}_{config['basemodel']}-{config['type']}.pt"
+    config_file_name = f"yolo{yolo_version}_{config['version']}_{config['basemodel']}-{config['type']}.json"
     training_output = project_path / 'train' / 'weights' / 'best.pt'
     engine_dir = Path(training_data_root) / DEFAULT_TRAINING_OUTPUT_YOLO_ENGINE_DIR
     engine_output = engine_dir / engine_file_name
