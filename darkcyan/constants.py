@@ -5,7 +5,7 @@ DEFAULT_CONFIG_DIR = Path.home() / ".darkcyan"
 
 DataType = Enum("DataType", ["det", "cls"])
 DataTag = Enum("DataTag", ["main", "scratch", "temp"])
-YoloVersion = Enum("YoloVersion", ["v8", "v9", "v10", "v11"])
+YoloVersion = Enum("YoloVersion", ["v8", "v9", "v10", "v11", "v12"])
 YoloBaseModels = Enum("YoloBaseModels", ["xlarge", "large", "medium",
                                          "small", "nano"])
 
@@ -72,6 +72,13 @@ YOLOMODELMAP = {
                 YoloBaseModels.small: "yolo11s.pt",
                 YoloBaseModels.nano: "yolo11n.pt",
             },
+            YoloVersion.v12: {
+                YoloBaseModels.xlarge: "yolo12x.pt",
+                YoloBaseModels.large: "yolo12l.pt",
+                YoloBaseModels.medium: "yolo12m.pt",
+                YoloBaseModels.small: "yolo12s.pt",
+                YoloBaseModels.nano: "yolo12n.pt",
+            },            
         },
     }
 
