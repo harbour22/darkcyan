@@ -12,6 +12,25 @@ files = [
 ]
 
 [[package]]
+name = "attrs"
+version = "25.1.0"
+description = "Classes Without Boilerplate"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "attrs-25.1.0-py3-none-any.whl", hash = "sha256:c75a69e28a550a7e93789579c22aa26b0f5b83b75dc4e08fe092980051e1090a"},
+    {file = "attrs-25.1.0.tar.gz", hash = "sha256:1c97078a80c814273a76b2a298a932eb681c87415c11dee0a6921de7f1b02c3e"},
+]
+
+[package.extras]
+benchmark = ["cloudpickle", "hypothesis", "mypy (>=1.11.1)", "pympler", "pytest (>=4.3.0)", "pytest-codspeed", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
+cov = ["cloudpickle", "coverage[toml] (>=5.3)", "hypothesis", "mypy (>=1.11.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
+dev = ["cloudpickle", "hypothesis", "mypy (>=1.11.1)", "pre-commit-uv", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
+docs = ["cogapp", "furo", "myst-parser", "sphinx", "sphinx-notfound-page", "sphinxcontrib-towncrier", "towncrier (<24.7)"]
+tests = ["cloudpickle", "hypothesis", "mypy (>=1.11.1)", "pympler", "pytest (>=4.3.0)", "pytest-mypy-plugins", "pytest-xdist[psutil]"]
+tests-mypy = ["mypy (>=1.11.1)", "pytest-mypy-plugins"]
+
+[[package]]
 name = "blessed"
 version = "1.20.0"
 description = "Easy, practical library for making terminal apps, by providing an elegant, well-documented interface to Colors, Keyboard input, and screen Positioning capabilities."
@@ -37,6 +56,32 @@ files = [
     {file = "cachetools-5.3.3-py3-none-any.whl", hash = "sha256:0abad1021d3f8325b2fc1d2e9c8b9c9d57b04c3932657a72465447332c24d945"},
     {file = "cachetools-5.3.3.tar.gz", hash = "sha256:ba29e2dfa0b8b556606f097407ed1aa62080ee108ab0dc5ec9d6a723a007d105"},
 ]
+
+[[package]]
+name = "cattrs"
+version = "24.1.2"
+description = "Composable complex class support for attrs and dataclasses."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "cattrs-24.1.2-py3-none-any.whl", hash = "sha256:67c7495b760168d931a10233f979b28dc04daf853b30752246f4f8471c6d68d0"},
+    {file = "cattrs-24.1.2.tar.gz", hash = "sha256:8028cfe1ff5382df59dd36474a86e02d817b06eaf8af84555441bac915d2ef85"},
+]
+
+[package.dependencies]
+attrs = ">=23.1.0"
+exceptiongroup = {version = ">=1.1.1", markers = "python_version < \"3.11\""}
+typing-extensions = {version = ">=4.1.0,<4.6.3 || >4.6.3", markers = "python_version < \"3.11\""}
+
+[package.extras]
+bson = ["pymongo (>=4.4.0)"]
+cbor2 = ["cbor2 (>=5.4.6)"]
+msgpack = ["msgpack (>=1.0.5)"]
+msgspec = ["msgspec (>=0.18.5)"]
+orjson = ["orjson (>=3.9.2)"]
+pyyaml = ["pyyaml (>=6.0)"]
+tomlkit = ["tomlkit (>=0.11.8)"]
+ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "certifi"
@@ -300,6 +345,43 @@ test = ["Pillow", "contourpy[test-no-images]", "matplotlib"]
 test-no-images = ["pytest", "pytest-cov", "wurlitzer"]
 
 [[package]]
+name = "coremltools"
+version = "8.2"
+description = "Community Tools for Core ML"
+optional = false
+python-versions = "*"
+files = [
+    {file = "coremltools-8.2-cp310-none-macosx_10_15_x86_64.whl", hash = "sha256:4c2ca229ca276031fed346902c3342d138ee922748045b925b9f99a5a8eb693f"},
+    {file = "coremltools-8.2-cp310-none-macosx_11_0_arm64.whl", hash = "sha256:f63e7e30a3bef791faa85debb0e63e08d45b8fe4b52279e719ea26b6317df129"},
+    {file = "coremltools-8.2-cp310-none-manylinux1_x86_64.whl", hash = "sha256:1a43d66ab5e45f30897e6056feaac2cdd945937fc35b83b0bdbc9621a670beac"},
+    {file = "coremltools-8.2-cp311-none-macosx_10_15_x86_64.whl", hash = "sha256:fb5527be932269ac9dfd12b0c25f66513c6f768536bd1d6245f9ff841443a229"},
+    {file = "coremltools-8.2-cp311-none-macosx_11_0_arm64.whl", hash = "sha256:85621521d6a0e942dd26fe7544698352fa479666da3d34dca57aa099b346c492"},
+    {file = "coremltools-8.2-cp311-none-manylinux1_x86_64.whl", hash = "sha256:14437cd9434a2dbb378d567f13860b79430857797ce9a65751a9bb662ea78c16"},
+    {file = "coremltools-8.2-cp312-none-macosx_10_15_x86_64.whl", hash = "sha256:6dfbcab37a2b43a13b2e79fce89505f8cdb5be970ce1ef2e745aad0626d32fe0"},
+    {file = "coremltools-8.2-cp312-none-macosx_11_0_arm64.whl", hash = "sha256:c0b5c96728f6a1580d45bf504f2ecbf85696f4044324fe8218badf8a063146d1"},
+    {file = "coremltools-8.2-cp312-none-manylinux1_x86_64.whl", hash = "sha256:4d5cad998185d453ec8ab51f7793336772188fa4251ad879c21d61f9a34a0e78"},
+    {file = "coremltools-8.2-cp37-none-macosx_10_15_x86_64.whl", hash = "sha256:a19d48f5a32c62d2ec1881122c73bd79985348cc6706388b481b1969cfb4367d"},
+    {file = "coremltools-8.2-cp37-none-manylinux1_x86_64.whl", hash = "sha256:bd6191b89ef0be86897862a497e82526132a20a645f63cb7ac8f4378dc1984d2"},
+    {file = "coremltools-8.2-cp38-none-macosx_10_15_x86_64.whl", hash = "sha256:3f3133895b625caf7df1e2c1e3e3b7d2b2bd09574a69188c61b74ec99001393b"},
+    {file = "coremltools-8.2-cp38-none-macosx_11_0_arm64.whl", hash = "sha256:d3b24df1e0c24b1eb5bae31afb34250f1cfd560ca7f41de2357c6f0587536bb2"},
+    {file = "coremltools-8.2-cp38-none-manylinux1_x86_64.whl", hash = "sha256:5f590998ba5897be7bd0ac66b825d7b2b5dc05bf04c5b4b11b5ed4862b9b1ad6"},
+    {file = "coremltools-8.2-cp39-none-macosx_10_15_x86_64.whl", hash = "sha256:45999212a4742191b8b1c925b3e16d8d7219a249e25fb0f1f6c282757812b38f"},
+    {file = "coremltools-8.2-cp39-none-macosx_11_0_arm64.whl", hash = "sha256:1ae1f07757254f54c96f61c68ee218862e9d70e90ff9e14d13c09b8cc46d6f77"},
+    {file = "coremltools-8.2-cp39-none-manylinux1_x86_64.whl", hash = "sha256:71bb4d681f60b25be74ef020fa76f0b139ca0177777d28587edc36498aea10e4"},
+    {file = "coremltools-8.2.tar.gz", hash = "sha256:78cd3cc2307652c4d1a9ee449f8fb5cb5f16ee42ab20039ba1251f8c96ac71fd"},
+]
+
+[package.dependencies]
+attrs = ">=21.3.0"
+cattrs = "*"
+numpy = ">=1.14.5"
+packaging = "*"
+protobuf = ">=3.1.0"
+pyaml = "*"
+sympy = "*"
+tqdm = "*"
+
+[[package]]
 name = "cycler"
 version = "0.12.1"
 description = "Composable style cycles"
@@ -339,6 +421,20 @@ files = [
 [package.dependencies]
 blessed = ">=1.17.7"
 prefixed = ">=0.3.2"
+
+[[package]]
+name = "exceptiongroup"
+version = "1.2.2"
+description = "Backport of PEP 654 (exception groups)"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
+    {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
+]
+
+[package.extras]
+test = ["pytest (>=6)"]
 
 [[package]]
 name = "ffmpeg-python"
@@ -1681,6 +1777,23 @@ files = [
 ]
 
 [[package]]
+name = "pyaml"
+version = "25.1.0"
+description = "PyYAML-based module to produce a bit more pretty and readable YAML-serialized data"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pyaml-25.1.0-py3-none-any.whl", hash = "sha256:f7b40629d2dae88035657c860f539db3525ddd0120a11e0bcb44d47d5968b3bc"},
+    {file = "pyaml-25.1.0.tar.gz", hash = "sha256:33a93ac49218f57e020b81e280d2706cea554ac5a76445ac79add760d019c709"},
+]
+
+[package.dependencies]
+PyYAML = "*"
+
+[package.extras]
+anchors = ["unidecode"]
+
+[[package]]
 name = "pyasn1"
 version = "0.6.0"
 description = "Pure-Python implementation of ASN.1 types and DER/BER/CER codecs (X.208)"
@@ -2155,21 +2268,18 @@ files = [
 
 [[package]]
 name = "ultralytics"
-version = "8.3.28"
+version = "8.3.102"
 description = "Ultralytics YOLO 🚀 for SOTA object detection, multi-object tracking, instance segmentation, pose estimation and image classification."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "ultralytics-8.3.28-py3-none-any.whl", hash = "sha256:983beb4ef3960dbbcd10269c5607e365c6be35d34eb1ce154f4a27aa209f4944"},
-    {file = "ultralytics-8.3.28.tar.gz", hash = "sha256:98aa555c10d031d65eb1feda6450807491b63f156b8f1071bfd2ef9eb6ec28a2"},
+    {file = "ultralytics-8.3.102-py3-none-any.whl", hash = "sha256:cf3609388358f82737538b46f69f6439242a48544a5feed2da602308dcbd0ecf"},
+    {file = "ultralytics-8.3.102.tar.gz", hash = "sha256:5500fd29f54e3d46302b38915a18f9a77efcfed5bd182cf501fdd8a5b8e4bad3"},
 ]
 
 [package.dependencies]
 matplotlib = ">=3.3.0"
-numpy = [
-    {version = ">=1.23.0,<2.0.0", markers = "sys_platform == \"darwin\""},
-    {version = ">=1.23.0", markers = "sys_platform != \"darwin\""},
-]
+numpy = ">=1.23.0,<=2.1.1"
 opencv-python = ">=4.6.0"
 pandas = ">=1.1.4"
 pillow = ">=7.1.2"
@@ -2180,16 +2290,16 @@ requests = ">=2.23.0"
 scipy = ">=1.4.1"
 seaborn = ">=0.11.0"
 torch = [
-    {version = ">=1.8.0", markers = "sys_platform != \"win32\""},
     {version = ">=1.8.0,<2.4.0 || >2.4.0", markers = "sys_platform == \"win32\""},
+    {version = ">=1.8.0", markers = "sys_platform != \"win32\""},
 ]
 torchvision = ">=0.9.0"
 tqdm = ">=4.64.0"
 ultralytics-thop = ">=2.0.0"
 
 [package.extras]
-dev = ["coverage[toml]", "ipython", "mkdocs (>=1.6.0)", "mkdocs-jupyter", "mkdocs-macros-plugin (>=1.0.5)", "mkdocs-material (>=9.5.9)", "mkdocs-redirects", "mkdocs-ultralytics-plugin (>=0.1.8)", "mkdocstrings[python]", "pytest", "pytest-cov"]
-export = ["coremltools (>=7.0)", "flatbuffers (>=23.5.26,<100)", "h5py (!=3.11.0)", "keras", "numpy (==1.23.5)", "onnx (>=1.12.0)", "openvino (>=2024.0.0)", "scikit-learn (>=1.3.2)", "tensorflow (>=2.0.0)", "tensorflowjs (>=3.9.0)", "tensorstore (>=0.1.63)"]
+dev = ["coverage[toml]", "ipython", "mkdocs (>=1.6.0)", "mkdocs-macros-plugin (>=1.0.5)", "mkdocs-material (>=9.5.9)", "mkdocs-ultralytics-plugin (>=0.1.17)", "mkdocstrings[python]", "pytest", "pytest-cov"]
+export = ["coremltools (>=8.0)", "flatbuffers (>=23.5.26,<100)", "h5py (!=3.11.0)", "keras", "onnx (>=1.12.0)", "openvino (>=2024.0.0,!=2025.0.0)", "scikit-learn (>=1.3.2)", "tensorflow (>=2.0.0)", "tensorflowjs (>=4.0.0)", "tensorstore (>=0.1.63)"]
 extra = ["albumentations (>=1.4.6)", "hub-sdk (>=0.0.12)", "ipython", "pycocotools (>=2.0.7)"]
 logging = ["comet", "dvclive (>=2.12.0)", "tensorboard (>=2.13.0)"]
 solutions = ["shapely (>=2.0.0)", "streamlit"]
@@ -2286,4 +2396,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "d4a2fdf219c1088417abf7bbe5e4e8bd104a3fa01b2437280224ba33669f18f0"
+content-hash = "4266e9f5981d40f749b432277674856c92dd8e7876b0e119bf5155941da1ad12"

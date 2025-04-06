@@ -169,7 +169,7 @@ class DarkCyanObjectDetection(object):
         else:
             self.device='0'
 
-        self.model = ct.models.MLModel('/Users/chris/developer/darkcyan_data/engines/yolov8_4.11_large-det.mlpackage')
+        self.model = ct.models.MLModel('/Users/chris/Documents/developer/darkcyan_data/engines/det/yolov8_4.11_large-det.mlpackage')
 
         self.categories = ast.literal_eval(self.model.user_defined_metadata['names'])
         self.imgsz = ast.literal_eval(self.model.user_defined_metadata['imgsz'])

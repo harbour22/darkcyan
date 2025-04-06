@@ -71,6 +71,8 @@ class DarkCyanVideoSource:
         return f"VideoSource object: {self.source_name}"    
 
     def update(self):
+
+        self.logger.info(f"Starting {self.source_name} FVS Capture")
         
         if platform == "linux" or platform == "linux2":
             self.stream = cv2.VideoCapture(self.source_path, cv2.CAP_GSTREAMER)
@@ -176,7 +178,7 @@ class DarkCyanObjectDetection(object):
         else:
             self.device='0'
 
-        self.model = YOLO('/Users/chris/developer/darkcyan_data/engines/yolov8_4.11_large-det.mlpackage', task='detect', verbose=False)
+        self.model = YOLO('/Users/chris/Documents/developer/darkcyan_data/engines/det/yolov8_4.15_large-det.mlpackage', task='detect', verbose=False)
         
         self.logger.debug('Warming yolo detection engine for image size: ' + str(self.imgsz))
         detection_engine_pf = Profile()
@@ -186,12 +188,18 @@ class DarkCyanObjectDetection(object):
             try:
                 results = self.model.predict(source=test_img, imgsz=(640,480), device=self.device, conf=0.4, iou=0.45, stream=True, verbose=False)                    
             except:
+                self.logger.debug (f"Failed first warmup :{detection_engine_pf.dt * 1E3:.1f}ms")
+
                 traceback.print_exc()
                 self.stop()
-        self.logger.debug (f"First warmup completed in :{detection_engine_pf.dt * 1E3:.1f}ms")
+        self.logger.debug (f"*First* warmup completed in :{detection_engine_pf.dt * 1E3:.1f}ms")
         with detection_engine_pf:
             results = self.model.predict(source=test_img, device=self.device, conf=0.4, iou=0.45)                    
         self.logger.debug (f"Second warmup completed in :{detection_engine_pf.dt * 1E3:.1f}ms")
+
+        with detection_engine_pf:
+            results = self.model.predict(source=test_img, device=self.device, conf=0.4, iou=0.45)                    
+        self.logger.debug (f"Third warmup completed in :{detection_engine_pf.dt * 1E3:.1f}ms")        
 
         self.results_queue = Queue(5)
         self.image_source_queue = image_source_queue
@@ -341,10 +349,13 @@ def run(logging_queue, source_name, source_path, buffer_lock, source_fps, infere
     logger.addHandler(qh)
 
     output_image_queue = Queue(5)
-    inference_engine = DarkCyanObjectDetection(logging_queue, source_name, inference_fps, output_image_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running)
-    image_stream = DarkCyanVideoSource(logging_queue, source_name, source_path, source_fps, output_image_queue, inference_engine.imgsz, keep_running)
+#    image_stream = DarkCyanVideoSource(logging_queue, source_name, source_path, source_fps, output_image_queue, inference_engine.imgsz, keep_running)
+    image_stream = DarkCyanVideoSource(logging_queue, source_name, source_path, source_fps, output_image_queue, (640,480), keep_running)
 
-    image_stream.start()
+
+    image_stream.start()    
+    inference_engine = DarkCyanObjectDetection(logging_queue, source_name, inference_fps, output_image_queue, infer_shared_memory, buffer_lock, status_shared_memory, results_queue, keep_running)
+
     inference_engine.start()
     try:
         while( keep_running.value and not image_stream.stopped and not inference_engine.stopped ):
