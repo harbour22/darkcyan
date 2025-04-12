@@ -41,6 +41,13 @@ YOLOMODELMAP = {
                 YoloBaseModels.medium: "yolo11m-cls.pt",
                 YoloBaseModels.small: "yolo11s-cls.pt",
                 YoloBaseModels.nano: "yolo11n-cls.pt",
+            },
+            YoloVersion.v12: {
+                YoloBaseModels.xlarge: "yolo12x-cls.pt",
+                YoloBaseModels.large: "yolo12l-cls.pt",
+                YoloBaseModels.medium: "yolo12m-cls.pt",
+                YoloBaseModels.small: "yolo12s-cls.pt",
+                YoloBaseModels.nano: "yolo12n-cls.pt",
             }
         },
         DataType.det: {
