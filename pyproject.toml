@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{include = "darkcyan_tools"}, {include = "darkcyan_utils"}, {include = "darkcyan"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.12,<4.0"
 enlighten = "^1.11.2"
 blessed = "^1.20.0"
 rich = "^13.3.5"
@@ -17,13 +17,15 @@ google-auth-httplib2 = "^0.1.0"
 google-auth-oauthlib = "^1.0.0"
 opencv-python = "^4.7.0.72"
 ultralytics = "^8.2"
-#torch = "2.1.0"
+## Must use >=2.7 or we see terrible performance issues
+torch = "2.7.0"
 imutils = "^0.5.4"
 lapx = "^0.5.5"
 ffmpeg-python = "^0.2.0"
-#coremltools = "^7.1"
+coremltools = "^8.3.0"
 onnx = "^1.15.0"
-coremltools = "^8.2"
+numpy = "^2.2.0"
+briefcase = "^0.3.23"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -32,3 +34,23 @@ pre-commit = "^3.3.1"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.briefcase]
+project_name = "darkcyan"
+bundle = "com.darkcyan"
+version = "0.0.1"
+description = "Darkcyan project, main runtime and associated tools"
+author = "Chris <developer@harbour22.uk>"
+author_email = "you@example.com"
+license = "MIT"
+url = "https://example.com"
+requires = []
+
+[tool.briefcase.app.myapp]
+formal_name = "DarkCyan"
+description = "A macOS app packaged with Briefcase"
+sources = ["darkcyan","darkcyan_tools","darkcyan_utils", "local", "app.py"]
+icon = "icons/myapp.icns"
+
+[tool.briefcase.app.myapp.macOS]
+app_name = "app.py"

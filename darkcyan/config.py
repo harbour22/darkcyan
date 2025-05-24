@@ -16,7 +16,7 @@ DEFAULT_CONFIG = {
     "local_data_repository": (
         Path.home() / "developer" / "darkcyan_data" / "training_data" / "main"
     ).as_posix(),
-    "config_file": (Path.home() / "developer" / "darkcyan_data" / "runtime_config" / "config.yaml").as_posix(),
+    "runtime_config_file": (Path.home() / "developer" / "darkcyan_data" / "runtime_config" / "config.yaml").as_posix(),
     "data_prefix": "limetree",
     "labelImg_cmd": "labelImg",
     "cls_test_ratio": 0.2,
