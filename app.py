@@ -48,7 +48,7 @@ def run(logging_queue):
         Config.get_value("runtime_config_file"), "r"
     ) as f:
         app_config = yaml.load(f, Loader=yaml.FullLoader)
-        logger.info(f"Loaded config file: {Config.get_value("config_file")}")
+        logger.info(f"Loaded config file: {Config.get_value('config_file')}")
 
 
     video_sources = {}
@@ -62,7 +62,7 @@ def run(logging_queue):
             keep_running,
         )
         video_sources[source] = {"vs": vsc}
-        logger.info(f"Loaded source: {source} with connection string {app_config["sources"][source]["cv2_connection_string"]}")
+        logger.info(f"Loaded source: {source} with connection string {app_config['sources'][source]['cv2_connection_string']}")
     
     signal_monitor = SignalMonitor.SignalMonitor()
 

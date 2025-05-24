@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Setup RPi dependencies if needed
+
+if grep -q "Raspberry Pi" /proc/device-tree/model 2>/dev/null; then
+    echo "Running on Raspberry Pi. Executing additional script..."
+    ./raspberry_pi_deps.sh
+else
+    echo "Not a Raspberry Pi. Skipping additional script."
+fi
+
 # Directory setup
 SCRIPT_DIR=$(dirname "$0")
 PROJECT_ROOT="${SCRIPT_DIR}/.."
@@ -15,10 +24,10 @@ clone_or_update() {
     
     if [ -d "$repo_dir" ]; then
         echo "Updating $repo_dir..."
-        git -C "$repo_dir" pull
+        git -C --depth=1 "$repo_dir" pull
     else
         echo "Cloning $repo_dir..."
-        git clone "$repo_url" "$repo_dir"
+        git clone --depth=1 "$repo_url" "$repo_dir"
     fi
 }
 
@@ -48,15 +57,24 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D BUILD_opencv_python2=OFF \
     -D BUILD_opencv_python3=ON \
     -D OPENCV_ENABLE_NONFREE=ON \
+    -D WITH_QT=OFF \
+    -D WITH_OPENMP=ON \
+    -D WITH_OPENCL=OFF \
+    -D WITH_TBB=ON \
+    -D BUILD_TBB=ON \
+    -D WITH_V4L=ON \
+    -D WITH_LIBV4L=ON \
+    -D WITH_VTK=OFF \
+    -D WITH_PROTOBUF=ON \
     -D PYTHON3_EXECUTABLE=$(which python3) \
     -D PYTHON3_INCLUDE_DIR=$(python3 -c "from distutils.sysconfig import get_python_inc; print(get_python_inc())") \
     -D PYTHON3_PACKAGES_PATH=$(python3 -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())") \
     -D WITH_GSTREAMER=ON \
     -D WITH_OPENGL=ON \
-    -D BUILD_EXAMPLES=ON \
+    -D BUILD_EXAMPLES=OFF \
     -B "$BUILD_DIR" \
     -S "$OPENCV_DIR"
 
 # Build and install
 echo "Building OpenCV..."
-make -C "$BUILD_DIR" -j$(sysctl -n hw.physicalcpu) install
+make -C "$BUILD_DIR" -j$(($(nproc) - 1)) install
