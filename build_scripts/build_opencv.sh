@@ -78,3 +78,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
 # Build and install
 echo "Building OpenCV..."
 make -C "$BUILD_DIR" -j$(($(nproc) - 1)) install
+
+# cleaning (frees 320 MB)
+make -C "$BUILD_DIR" clean
+sudo apt-get update
