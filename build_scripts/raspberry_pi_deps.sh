@@ -1,6 +1,6 @@
 # check for updates
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get -y upgrade
 # dependencies
 sudo apt-get install -y build-essential cmake git unzip pkg-config
 sudo apt-get install -y libjpeg-dev libpng-dev
