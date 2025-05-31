@@ -51,7 +51,7 @@ def create_main_from_scratch(version, type=DataType.det):
     target_filename = get_local_zipfile_for_version(version, type, False)
 
     with Progress(transient=True) as progress:
-        task1 = progress.add_task("[blue]Creating zipfile...", total=None)
+        task1 = progress.add_task(f"[blue]Creating zipfile {target_filename}...", total=None)
         shutil.make_archive(
             target_filename, "zip", root_dir=working_dir, base_dir=".", dry_run=False
         )

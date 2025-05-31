@@ -38,6 +38,8 @@ import difflib
 import shutil
 import sys
 from pathlib import Path
+from collections.abc import Iterable
+
 
 from blessed import Terminal
 from rich.progress import Progress
@@ -77,7 +79,6 @@ def ask_for_yolo_version(dataType):
             print(term.red(f"Illogical choice {choice}"))
             return
     # never going to work...
-    print(list(YOLOMODELMAP[dataType]),YOLOMODELMAP[dataType], dataType, int(choice))
     yoloVersion = list(YOLOMODELMAP[dataType])[int(choice)-1]
 
     return yoloVersion
@@ -97,11 +98,27 @@ def ask_for_data_version(datatype, tag):
         version = versions[int(term.inkey()) - 1]
         print(term.darkcyan(f"{version}"))
         return version
+    
+def ask_for_yolo_model():
+    print(term.magenta(f"Select model size to train"))
+    for choice, model in enumerate(YoloBaseModels, start=1):
+        print(term.magenta(f"{choice}: {model.name}"))
+
+    with term.cbreak():
+        choice = term.inkey()
+        if choice not in [str(i) for i in range(1, len(YoloBaseModels) + 1)]:
+            print(term.red(f"Illogical choice {choice}"))
+            return None
+    
+        return YoloBaseModels(int(choice))
+    
 
 
-def upload_to_google_drive():
-    datatype = ask_for_dataset_type()
-    version = ask_for_data_version(datatype, DataTag.temp)
+def upload_to_google_drive(datatype = None, version = None):
+    if(datatype == None):
+        datatype = ask_for_dataset_type()
+    if(version == None):
+        version = ask_for_data_version(datatype, DataTag.temp)
 
     file_to_upload = get_local_zipfile_for_version(version, datatype,
                                                    tag=DataTag.temp)
@@ -371,9 +388,11 @@ def author_new_dataset():
     print()
 
 
-def create_main_dataset_from_scratch():
-    datatype = ask_for_dataset_type()
-    scratch_version = ask_for_data_version(datatype, DataTag.scratch)
+def create_main_dataset_from_scratch(datatype = None, scratch_version = None):
+    if(datatype == None):
+        datatype = ask_for_dataset_type()
+    if(scratch_version == None):
+        scratch_version = ask_for_data_version(datatype, DataTag.scratch)
     if scratch_version is None:
         return
 
@@ -413,10 +432,13 @@ def remove_working_copy_of_data():
     print()
 
 
-def prepare_data_for_training():
-    datatype = ask_for_dataset_type()
-    src_version = training_version = ask_for_data_version(datatype, DataTag.scratch)
-
+def prepare_data_for_training(datatype = None, src_version = None, training_version = None):
+    if(datatype==None):
+        datatype = ask_for_dataset_type()
+    if(src_version==None):
+        src_version = training_version = ask_for_data_version(datatype, DataTag.scratch)
+    if(training_version==None):
+        training_version = ask_for_data_version(datatype, DataTag.scratch)        
     if datatype == DataType.det:
         create_yolo_detection_dataset(src_version, training_version, 980)
         create_training_zipfile(training_version, DataType.det)
@@ -445,47 +467,64 @@ def remove_and_recreate_temp_directory():
         print(term.darkcyan(f"Cleared and recreating the temp directory"))
 
 
-def create_colab_training_config():
-    datatype = ask_for_dataset_type()
-    version = ask_for_data_version(datatype, DataTag.temp)
-    yoloVersion = ask_for_yolo_version(datatype)
+def create_colab_training_config(datatype = None, version = None, yoloVersion = None, basemodel = None):
 
-    print(term.magenta(f"Select modelsize to train"))
-    for choice, model in enumerate(YoloBaseModels, start=1):
-        print(term.magenta(f"{choice}: {model.name}"))
+    if(datatype==None):
+        datatype = ask_for_dataset_type()
+    if(version == None):
+        version = ask_for_data_version(datatype, DataTag.temp)
+    if(yoloVersion == None):
+        yoloVersion = ask_for_yolo_version(datatype)
+    if(basemodel == None):
+        basemodel = ask_for_yolo_model()
 
-    with term.cbreak():
-        choice = term.inkey()
-        if choice not in [str(i) for i in range(1, len(YoloBaseModels) + 1)]:
-            print(term.red(f"Illogical choice {choice}"))
+    if(None in (datatype, yoloVersion, basemodel)):
+        print(term.magenta(f"One or more parameters missing ({datatype}, {yoloVersion}, {basemodel})"))
+        return
+
+    config_file = create_config_file(version, datatype, basemodel, yoloVersion)
+    google_parent_dir = get_directory_id_from_path(
+        DEFAULT_TRAINING_YOLO_CONFIG_DIR
+    )
+    ## Delete existing files from google drive
+    existing_files = get_file_id(config_file.name, google_parent_dir)
+    if existing_files:
+        print(
+            term.red(
+                f"Found existing {len(existing_files)} file(s) with name {config_file.name} - deleting?"
+            )
+        )
+        
+        for file in existing_files:
+            delete_file(file["id"])
+            print(term.magenta(f"Deleted {file}"))
+
+    upload_file(config_file, google_parent_dir, "application/json")
+    print(term.magenta(f"Uploaded {config_file} to {google_parent_dir}"))
+
+def run_build_chain():
+    
+        datatype = ask_for_dataset_type()
+        if(datatype == None):
+            print(term.magenta(f"Unable to run build chain"))
+            return
+        version = ask_for_data_version(datatype, DataTag.scratch)
+        if(version == None):
+            print(term.magenta(f"Unable to run build chain"))
+            return
+        yoloVersion = ask_for_yolo_version(datatype)
+        if(yoloVersion == None):
+            print(term.magenta(f"Unable to run build chain"))
+            return
+        basemodel = ask_for_yolo_model()
+        if(basemodel == None):
+            print(term.magenta(f"Unable to run build chain"))
             return
 
-        basemodel = YoloBaseModels(int(choice))
-
-        config_file = create_config_file(version, datatype, basemodel, yoloVersion)
-        google_parent_dir = get_directory_id_from_path(
-            DEFAULT_TRAINING_YOLO_CONFIG_DIR
-        )
-        ## Delete existing files from google drive
-        existing_files = get_file_id(config_file.name, google_parent_dir)
-        if existing_files:
-            print(
-                term.red(
-                    f"Found existing {len(existing_files)} file(s) with name {config_file.name} - overwrite? (y/N)"
-                )
-            )
-            with term.cbreak():
-                overwrite = term.inkey()
-                print(term.darkcyan(f"{overwrite}"))
-                if overwrite == "y":
-                    for file in existing_files:
-                        delete_file(file["id"])
-                        print(term.magenta(f"Deleted {file}"))
-                else:
-                    return
-
-        upload_file(config_file, google_parent_dir, "application/json")
-        print(term.magenta(f"Uploaded {config_file} to {google_parent_dir}"))
+        prepare_data_for_training(datatype, version, version)
+        upload_to_google_drive(datatype, version)
+        create_colab_training_config(datatype, version, yoloVersion, basemodel)
+        create_main_dataset_from_scratch(datatype, version)
 
 
 def print_command_menu():
@@ -510,32 +549,48 @@ command_options = [
     ("3", "Trim detection dataset", trim_detection_dataset),
     ("4", "Launch labelImg for detection data", run_labelimg),
     ("", "", None),
-    ("", "=== Training Data Manipulation ===", None),
+
+    ("", "=== Cloud Upload and Training ===", None),
+    ("t", "Run training command chain (prepare, upload, command, build)", 
+     run_build_chain),
     (
         "5",
-        "Build new master dataset from local working copy",
-        create_main_dataset_from_scratch,
-    ),
-    ("6", "Remove local working copy", remove_working_copy_of_data),
-    (
-        "7",
         "Prepare data for training from local working copy",
         prepare_data_for_training,
-    ),
-    ("", "", None),
-    ("", "=== Cloud Upload and Training ===", None),
-    ("8", "Upload data to google drive (on auth err rm token.json)", upload_to_google_drive),
+    ),    
+    ("6", "Upload data to google drive (on auth err rm token.json)", upload_to_google_drive),
     (
-        "9",
+        "7",
         "Create colab training command and upload to google drive",
         create_colab_training_config,
     ),
     ("", "", None),
+    ("", "=== Training Data Manipulation ===", None),
+    (
+        "8",
+        "Build new master dataset from local working copy",
+        create_main_dataset_from_scratch,
+    ),
+    ("9", "Remove local working copy", remove_working_copy_of_data),
+    
+    ("", "", None),    
     ("", "=== Utilities ===", None),
     ("c", "Clear temp directory", remove_and_recreate_temp_directory),
     ("m", "Show full menu", print_command_menu),
     ("q", "Quit", quit),
 ]
+
+def run_functions(funcs):
+    if isinstance(funcs, Iterable) and not isinstance(funcs, (str, bytes)):
+        for f in funcs:
+            if callable(f):
+                f()
+            else:
+                print(term.red(f"Item {f} is not callable."))
+    elif callable(funcs):
+        funcs()
+    else:
+        print(term.red("Input is neither a function nor an iterable of functions."))
 
 
 def run():
@@ -560,8 +615,7 @@ def run():
             ]  ## In case we have multiple commands mapped to the same key
 
             print(term.magenta(f"Running " + term.blue(f"{command[1]}")))
-            command[2]()
-
+            run_functions(command[2])
 
 if __name__ == "__main__":
     run()

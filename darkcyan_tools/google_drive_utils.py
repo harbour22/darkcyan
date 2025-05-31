@@ -116,6 +116,7 @@ def get_directory_id_from_path(parent_directory_path):
 
 
 def upload_file(upload_file_path, parent_id, mimetype="application/zip"):
+    
     creds = get_credentials()
     with Progress(transient=True) as progress:
         task1 = progress.add_task(
