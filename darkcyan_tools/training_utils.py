@@ -78,11 +78,11 @@ def train():
     batch = config['batchsize']
     epochs = config['epochs']
     imgsz = config['imgsz']
-    yolo_version = YoloVersion[config.get('yolov', 'v8')].name
+    yolo_version = YoloVersion[config.get('yolov', 'v8')]
 
     project_path = Path(training_data_root) / \
                 DEFAULT_TRAINING_YOLO_OUTPUT_DIR / \
-                config['type'] / f"darkcyan_{config['version']}" / yolo_version / \
+                config['type'] / f"darkcyan_{config['version']}" / yolo_version.name / \
                 model_size.name
 
     data = data_path = temp_dir_root / f"{data_type.name}_{version}_training_data"
