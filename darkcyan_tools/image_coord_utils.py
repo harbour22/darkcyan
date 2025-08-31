@@ -11,6 +11,7 @@ import blessed
 term = blessed.Terminal()
 
 def show_image_with_coords(image_file, camera_name):
+    print(f'Loading {image_file}')
 
     # read image 
     image = cv2.imread(image_file.as_posix())
