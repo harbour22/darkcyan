@@ -91,7 +91,7 @@ def show_image_with_coords(image_file, camera_name):
 
 
 def main():
-    show_image_with_coords( Path(Config.get_value('local_data_repository')) / 'test_data' / 'Reolink4k-Courtyard.jpg', 'reolink4k-courtyard')
+    show_image_with_coords( Path(Config.get_value('local_data_repository')) / 'test_data' / 'Reolink4k-Middle.jpg', 'reolink4k-middle')
 
 
 if __name__ == "__main__":
