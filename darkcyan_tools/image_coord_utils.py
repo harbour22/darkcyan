@@ -10,7 +10,7 @@ from darkcyan.config import Config
 import blessed
 term = blessed.Terminal()
 
-def show_image_with_coords(image_file, camera_name):
+def show_image_with_coords(image_file, camera_name, config_location=Path(DEFAULT_CONFIG_DIR) / DEFAULT_RUNTIME_CONFIG_FILE):
     print(f'Loading {image_file}')
 
     # read image 
@@ -18,7 +18,9 @@ def show_image_with_coords(image_file, camera_name):
 
     y_size, x_size, depth = image.shape
 
-    with open((Path(DEFAULT_CONFIG_DIR) / DEFAULT_RUNTIME_CONFIG_FILE ), "r", encoding='utf8') as f:
+    print(f'Loading config {config_location}')
+
+    with open(config_location , "r", encoding='utf8') as f:
         app_defaults = yaml.full_load(f.read())
 
 
@@ -91,7 +93,9 @@ def show_image_with_coords(image_file, camera_name):
 
 
 def main():
-    show_image_with_coords( Path(Config.get_value('local_data_repository')) / 'test_data' / 'Reolink4k-Middle.jpg', 'reolink4k-middle')
+    show_image_with_coords( Path(Config.get_value('darkcyan_data_home')) / 'test_data' / 'images' / 'Reolink4kFront-11OCT25.jpg', 
+                           'reolink4k-front',
+                           '../magenta/config/magenta-defaults.yaml')
 
 
 if __name__ == "__main__":

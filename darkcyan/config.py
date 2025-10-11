@@ -9,12 +9,15 @@ from rich import print
 from .constants import DEFAULT_CONFIG_DIR, DataTag, GOOGLEDRIVE_SRC_TRAINING_DATA_ROOT
 
 DEFAULT_CONFIG = {
+    "darkcyan_data_home": (
+        Path.home() / "Documents" / "developer" / "darkcyan_data"
+        ).as_posix(),
     f"scratch_dir": (
         Path.home() / "developer"  / "darkcyan_data" / "training_data" / "scratch"
     ).as_posix(),
     "temp_dir": (Path.home() / "developer" / "darkcyan_data" / "training_data" / "temp").as_posix(),
     "local_data_repository": (
-        Path.home() / "developer" / "darkcyan_data" / "training_data" / "main"
+        Path.home() / "Documents" / "developer" / "darkcyan_data" / "training_data" / "main"
     ).as_posix(),
     "runtime_config_file": (Path.home() / "developer" / "darkcyan_data" / "runtime_config" / "config.yaml").as_posix(),
     "data_prefix": "limetree",
