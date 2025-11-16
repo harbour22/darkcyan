@@ -15,3 +15,15 @@ gst-launch-1.0 rtspsrc user-id=<pwd> user-pw=<uid> location=rtsp://reolink4k-fro
 ```bash
 export PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring
 ```
+
+## Testing app
+
+For the frontend we need to run this command
+```bash
+npm run dev
+```
+and for the backend
+
+```bash
+uvicorn server:app --reload
+```

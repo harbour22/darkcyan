@@ -22,10 +22,14 @@ torch = "2.7.0"
 imutils = "^0.5.4"
 lapx = "^0.5.5"
 ffmpeg-python = "^0.2.0"
-coremltools = "^8.3.0"
+coremltools = "^9.0.0"
 onnx = "^1.15.0"
 numpy = "^2.2.0"
 briefcase = "^0.3.23"
+fastapi = "^0.121.2"
+uvicorn = "^0.38.0"
+websockets = "^15.0.1"
+av = "^16.0.1"
 
 
 [tool.poetry.group.dev.dependencies]

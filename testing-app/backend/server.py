@@ -22,9 +22,8 @@ YOLO_INPUT_WIDTH = 640      # width YOLO sees
 YOLO_MIN_CONF = 0.3         # optional: filter low-confidence boxes
 
 YOLO_MODEL_PATH = "/Users/chris/Documents/developer/darkcyan_data/engines/det/yolov8_4.15_large-det.mlpackage"
-YOLO_NUM_WORKERS = 2          # try 2 first; can bump to 3–4 if stable
-YOLO_INPUT_WIDTH = 640        # downscaled width for YOLO inference
-YOLO_MIN_CONF = 0.3           # filter low-confidence boxes
+YOLO_NUM_WORKERS = 2        # try 2 first; can bump to 3–4 if stable
+JPEG_PARAMS = [int(cv2.IMWRITE_JPEG_QUALITY), 85]
 
 
 
@@ -132,7 +131,7 @@ stop_event = threading.Event()
 VIDEO_SOURCES: Dict[str, object] = {
     "cam1": "/Users/chris/Documents/developer/darkcyan_data/test_data/video/Reolink4kFront-20230910-191600.mp4",
     "cam2": "/Users/chris/Documents/developer/darkcyan_data/test_data/video/Reolink4kFront-20230910-191600.mp4",
-    "cam3": "/Users/chris/Documents/developer/darkcyan_data/test_data/video/Reolink4kFront-20230910-191600.mp4",
+    #"cam3": "/Users/chris/Documents/developer/darkcyan_data/test_data/video/Reolink4kFront-20230910-191600.mp4",
 }
 
 def is_camera_source(source) -> bool:
@@ -201,12 +200,12 @@ def frame_producer(
 
     # -------------------------
     # Filter graph:
-    #   decode -> scale -> format(yuvj420p) -> buffersink
+    #   decode -> scale -> format(bgr24) -> buffersink
     # -------------------------
     filter_graph = av.filter.Graph()
     buffer_src = filter_graph.add_buffer(template=video_stream)
     scale = filter_graph.add("scale", f"{max_width}:-1")
-    fmt = filter_graph.add("format", "yuvj420p")   # crucial for MJPEG
+    fmt = filter_graph.add("format", "bgr24")
     buffer_sink = filter_graph.add("buffersink")
 
     buffer_src.link_to(scale)
@@ -220,10 +219,7 @@ def frame_producer(
     # Track schedule for pacing so we match the file FPS without cumulative drift.
     next_frame_time = time.time()
 
-    # MJPEG encoder (initialized once we know width/height)
-    mjpeg_codec = None
-
-    logger.info(f"[{source_id}] Frame producer (PyAV + MJPEG) started")
+    logger.info(f"[{source_id}] Frame producer (PyAV + OpenCV JPEG) started")
 
     while not stop_event.is_set():
         try:
@@ -240,32 +236,31 @@ def frame_producer(
                     except Exception:
                         break  # no more frames from this packet
 
+                    if stop_event.is_set():
+                        break
+
                     h = filt_frame.height
                     w = filt_frame.width
                     ts = time.time()
 
-                    # -------------------------
-                    # Lazy init MJPEG encoder
-                    # -------------------------
-                    if mjpeg_codec is None:
-                        mjpeg_codec = av.CodecContext.create("mjpeg", "w")
-                        mjpeg_codec.width = w
-                        mjpeg_codec.height = h
-                        mjpeg_codec.pix_fmt = "yuvj420p"   # REQUIRED for JPEG
-                        logger.info(
-                            f"[{source_id}] MJPEG encoder init: {w}x{h}, pix_fmt=yuvj420p"
+                    bgr_frame = filt_frame.to_ndarray(format="bgr24")
+
+                    # Prepare YOLO-sized frame ahead of time for faster inference threads.
+                    yolo_frame = bgr_frame
+                    scale_x = scale_y = 1.0
+                    if w > YOLO_INPUT_WIDTH:
+                        new_w = YOLO_INPUT_WIDTH
+                        new_h = int(h * (YOLO_INPUT_WIDTH / w))
+                        yolo_frame = cv2.resize(
+                            bgr_frame, (new_w, new_h), interpolation=cv2.INTER_AREA
                         )
+                        scale_x = w / new_w
+                        scale_y = h / new_h
 
-                    # -------------------------
-                    # Encode JPEG via ffmpeg
-                    # -------------------------
-                    jpeg = None
-                    for packet in mjpeg_codec.encode(filt_frame):
-                        jpeg = bytes(packet)
-                        break
-
-                    if jpeg:
-                        state.update_frame(jpeg, w, h, ts)
+                    # Encode JPEG via OpenCV (quality tuned for throughput).
+                    success, encoded = cv2.imencode(".jpg", bgr_frame, JPEG_PARAMS)
+                    if success:
+                        state.update_frame(encoded.tobytes(), w, h, ts)
 
                         ts_deque.append(ts)
                         if len(ts_deque) >= 2:
@@ -274,12 +269,10 @@ def frame_producer(
                                 state.update_video_fps((len(ts_deque)-1)/elapsed)
 
                     # -------------------------
-                    # Provide NV12 frame to YOLO worker
+                    # Provide YOLO-ready frame to YOLO worker
                     # -------------------------
-                    nv12 = filt_frame.to_ndarray(format="nv12")
-
                     try:
-                        frame_queue.put((nv12, w, h, ts), block=False)
+                        frame_queue.put((yolo_frame, w, h, scale_x, scale_y, ts), block=False)
                     except queue.Full:
                         # Drop oldest
                         try:
@@ -287,7 +280,7 @@ def frame_producer(
                         except queue.Empty:
                             pass
                         try:
-                            frame_queue.put((nv12, w, h, ts), block=False)
+                            frame_queue.put((yolo_frame, w, h, scale_x, scale_y, ts), block=False)
                         except queue.Full:
                             pass
 
@@ -303,12 +296,16 @@ def frame_producer(
                         # Fell behind – reset schedule to now to avoid long-term drift.
                         next_frame_time = time.time()
 
+                if stop_event.is_set():
+                    break
+
             # EOF → loop file
             if stop_event.is_set():
                 break
 
             logger.info(f"[{source_id}] EOF reached, seeking(0)")
             container.seek(0)
+            # Nothing persistent to reset when looping.
 
         except Exception as e:
             logger.error(f"[{source_id}] Error during PyAV decode: {e}")
@@ -327,7 +324,7 @@ def yolo_worker(
     model_path: str,
     worker_idx: int,
 ):
-    """YOLO worker: consumes NV12 frames, converts to BGR, downscales for YOLO, etc."""
+    """YOLO worker: consumes pre-sized frames and runs YOLO inference."""
     logger.info(f"[{source_id}][yolo{worker_idx}] Initializing YOLO model on {device}")
     local_model = YOLO(model_path, task='detect')
 
@@ -335,28 +332,20 @@ def yolo_worker(
 
     while not stop_event.is_set():
         try:
-            nv12, w, h, ts_in = frame_queue.get(timeout=0.1)
+            item = frame_queue.get(timeout=0.1)
         except queue.Empty:
             continue
 
+        if item is None:
+            break
+
+        yolo_frame, _orig_w, _orig_h, scale_x, scale_y, ts_in = item
+
         queue_delay_ms = (time.time() - ts_in) * 1000.0
 
-        # NV12 -> BGR (CPU; clean place to swap for hardware conversion later)
-        bgr = cv2.cvtColor(nv12, cv2.COLOR_YUV2BGR_NV12)
-
-        # Downscale for YOLO speed
-        yolo_input = bgr
-        scale_x = scale_y = 1.0
-        if w > YOLO_INPUT_WIDTH:
-            new_w = YOLO_INPUT_WIDTH
-            new_h = int(h * (YOLO_INPUT_WIDTH / w))
-            yolo_input = cv2.resize(bgr, (new_w, new_h), interpolation=cv2.INTER_AREA)
-            scale_x = w / new_w
-            scale_y = h / new_h
-
-        # YOLO inference
+        # YOLO inference (input already resized on producer thread)
         start = time.time()
-        results = local_model(yolo_input, device=device, verbose=False)
+        results = local_model(yolo_frame, device=device, verbose=False)
         yolo_ms = (time.time() - start) * 1000.0
 
         # Extract detections, scale boxes back to original size
@@ -387,6 +376,26 @@ def yolo_worker(
         state.record_yolo_frame(time.time())
 
     logger.info(f"[{source_id}][yolo{worker_idx}] YOLO worker stopped")
+
+
+def _signal_worker_shutdown():
+    """Ensure YOLO workers unblock by flushing queues and pushing sentinels sequentially."""
+    for sid, q in frame_queues.items():
+        # Drop any pending frames – we don't need to finish processing them.
+        while True:
+            try:
+                q.get_nowait()
+            except queue.Empty:
+                break
+
+        for worker_idx in range(YOLO_NUM_WORKERS):
+            try:
+                q.put(None, timeout=2.0)
+            except queue.Full:
+                logger.warning(
+                    f"[{sid}] Timeout inserting shutdown sentinel for YOLO worker {worker_idx}"
+                )
+
 
 def startup():
     logger.info("Startup: initializing video pipelines")
@@ -449,10 +458,13 @@ async def lifespan(app: FastAPI):
     stop_event.set()
     logger.info("Shutdown: stop_event set")
 
-    # Join worker threads so shutdown finishes cleanly.
-    for t in worker_threads:
-        if t.is_alive():
-            t.join(timeout=2.0)
+    def _join_threads():
+        _signal_worker_shutdown()
+        for t in worker_threads:
+            if t.is_alive():
+                t.join(timeout=2.0)
+
+    await loop.run_in_executor(None, _join_threads)
 
 
 app = FastAPI(lifespan=lifespan)
